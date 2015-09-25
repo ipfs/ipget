@@ -9,6 +9,7 @@ import (
   context "golang.org/x/net/context"
 	path "github.com/ipfs/go-ipfs/path"
 	uio "github.com/ipfs/go-ipfs/unixfs/io"
+  pb "github.com/cheggaaa/pb"
 )
 
 func main() {
@@ -21,11 +22,6 @@ func main() {
   })
   outFile := cmd.StringOpt("o output", "", "output file path")
   cmd.Action = func() {
-    if *hash == "" {
-      fmt.Printf("you gotsta have a hash\n")
-      return
-    }
-
     if *outFile == "" {
       *outFile = "./" + *hash
     }
@@ -61,8 +57,14 @@ func get(path, outFile string) {
     return
   }
 
-  // reader := io.MultiReader(readers...)
-  io.Copy(file, reader)
+  bar := pb.New(int(length)).SetUnits(pb.U_BYTES)
+  bar.ShowSpeed = false
+  bar.Start()
+  writer := io.MultiWriter(file, bar)
+
+  io.Copy(writer, reader)
+
+  bar.Finish()
 
   fmt.Printf("wrote %v to %v (%v bytes)\n", path, outFile, length)
 }
@@ -78,5 +80,6 @@ func cat(ctx context.Context, node *core.IpfsNode, fpath string) (io.Reader, uin
     return nil, 0, err
   }
   length := uint64(reader.Size())
+
 	return reader, length, nil
 }
