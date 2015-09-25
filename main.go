@@ -11,25 +11,6 @@ import (
 	uio "github.com/ipfs/go-ipfs/unixfs/io"
 )
 
-const (
-  usage = `Usage: ipget <ipfs-path>
-      ipget <ipfs-path> -o <local-path>
-      ipget <ipfs-path> (-a | --api) <addr>
-      ipget <ipfs-path> [--mdns] [--solarnet] [--bootstrap <list>]
-      ipget <ipfs-path> [ (-t | --transports) <protos> ]
-
-
-Options:
-
--o, --output <local-path>   output to local path
--t, --transports <protos>   toggle transports (tcp, utp, udt, ble, aud)
--a, --api <addr>            delegate to node api at given address
---mdns                      enable mdns discovery (default: true)
---public                    use the public ipfs network for bootstrap (default: true)
---bootstrap <file>          use custom bootstrap list`
-  defaultOutPath = "./aus"
-)
-
 func main() {
   cmd := cli.App("ipget", "Retrieve and save IPFS objects.")
   cmd.Spec = "IPFS_PATH [-o]"
