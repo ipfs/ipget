@@ -49,7 +49,7 @@ func get(path, outFile string) {
     return
   }
 
-  readers, _, err := cat(node.Context(), node, []string{path})
+  reader, length, err := cat(node.Context(), node, path)
   if err != nil {
     fmt.Printf("%v\n", err)
     return
@@ -61,27 +61,22 @@ func get(path, outFile string) {
     return
   }
 
-  reader := io.MultiReader(readers...)
+  // reader := io.MultiReader(readers...)
   io.Copy(file, reader)
 
-  fmt.Printf("wrote %v to %v\n", path, outFile)
+  fmt.Printf("wrote %v to %v (%v bytes)\n", path, outFile, length)
 }
 
-func cat(ctx context.Context, node *core.IpfsNode, paths []string) ([]io.Reader, uint64, error) {
-	readers := make([]io.Reader, 0, len(paths))
-	length := uint64(0)
-	for _, fpath := range paths {
-		dagnode, err := core.Resolve(ctx, node, path.Path(fpath))
-		if err != nil {
-			return nil, 0, err
-		}
+func cat(ctx context.Context, node *core.IpfsNode, fpath string) (io.Reader, uint64, error) {
+  dagnode, err := core.Resolve(ctx, node, path.Path(fpath))
+  if err != nil {
+    return nil, 0, err
+  }
 
-		read, err := uio.NewDagReader(ctx, dagnode, node.DAG)
-		if err != nil {
-			return nil, 0, err
-		}
-		readers = append(readers, read)
-		length += uint64(read.Size())
-	}
-	return readers, length, nil
+  reader, err := uio.NewDagReader(ctx, dagnode, node.DAG)
+  if err != nil {
+    return nil, 0, err
+  }
+  length := uint64(reader.Size())
+	return reader, length, nil
 }
