@@ -1,10 +1,11 @@
 # Installation
 
 ```
-$ go get github.com/jawher/mow.cli github.com/ipfs/go-ipfs/core github.com/ipfs/go-ipfs/path github.com/ipfs/go-ipfs/unixfs/io github.com/cheggaaa/pb
+$ go get github.com/jawher/mow.cli
+$ go get github.com/ipfs/go-ipfs
+$ go get github.com/cheggaaa/pb
 
 $ go build
-
 $ go install
 
 $ ipget QmTJHuzG3mjgmvcfvTU4ykWXwD4QjA5aCk6QsU4BPaD8Hh/cat2.gif -o nyan.gif
