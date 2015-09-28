@@ -31,7 +31,7 @@ func main() {
 		}
 
 		if err := get(*hash, *outFile); err != nil {
-			fmt.Printf("ipget failed: %s", err)
+			fmt.Fprintf(os.Stderr, "ipget failed: %s", err)
 			os.Remove(*outFile)
 			os.Exit(1)
 		}
@@ -50,10 +50,10 @@ func get(path, outFile string) error {
 
 	err = node.Bootstrap(core.DefaultBootstrapConfig)
 	if err != nil {
-		return fmt.Errorf("node Bootstrap failed: %s", err)
+		return fmt.Errorf("node Bootstrap() failed: %s", err)
 	}
 
-	fmt.Println("IPFS Node bootstraped (took %v)", time.Since(start))
+	fmt.Fprintf(os.Stderr, "IPFS Node bootstrapping (took %v)\n", time.Since(start))
 
 	reader, length, err := cat(node.Context(), node, path)
 	if err != nil {
@@ -62,21 +62,23 @@ func get(path, outFile string) error {
 
 	file, err := os.Create(outFile)
 	if err != nil {
-		return fmt.Errorf("creating output file %q failed: %s", outFile, err)
+		return fmt.Errorf("Creating output file %q failed: %s", outFile, err)
 	}
 
 	bar := pb.New(int(length)).SetUnits(pb.U_BYTES)
+	bar.Output = os.Stderr
 	bar.ShowSpeed = false
 	bar.Start()
 	writer := io.MultiWriter(file, bar)
 
 	if _, err := io.Copy(writer, reader); err != nil {
-		return fmt.Errorf("copying failed: %s", err)
+		return fmt.Errorf("copy failed: %s", err)
 	}
 
 	bar.Finish()
 
-	fmt.Printf("wrote %q to %q (%s) (took %v)\n", path, outFile, humanize.Bytes(length), time.Since(start))
+	fmt.Fprintf(os.Stderr, "Wrote %q to %q (%s) (took %v)\n", path, outFile,
+		humanize.Bytes(length), time.Since(start))
 	return nil
 }
 
