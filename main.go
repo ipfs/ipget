@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"time"
 
@@ -41,7 +42,8 @@ func main() {
 
 func get(path, outFile string) error {
 	start := time.Now()
-	node, err := core.NewNode(context.Background(), &core.BuildCfg{
+	ctx, cancel := context.WithCancel(context.Background())
+	node, err := core.NewNode(ctx, &core.BuildCfg{
 		Online: true,
 	})
 	if err != nil {
@@ -54,6 +56,14 @@ func get(path, outFile string) error {
 	}
 
 	fmt.Fprintf(os.Stderr, "IPFS Node bootstrapping (took %v)\n", time.Since(start))
+
+	// Cancel the ipfs node context if the process gets interrupted or killed.
+	go func() {
+		interrupts := make(chan os.Signal, 1)
+		signal.Notify(interrupts, os.Interrupt, os.Kill)
+		<-interrupts
+		cancel()
+	}()
 
 	reader, length, err := cat(node.Context(), node, path)
 	if err != nil {
