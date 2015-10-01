@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"time"
 
 	pb "github.com/cheggaaa/pb"
@@ -28,7 +27,13 @@ func main() {
 	outFile := cmd.StringOpt("o output", "", "output file path")
 	cmd.Action = func() {
 		if *outFile == "" {
-			*outFile = filepath.Base(*hash)
+			ipfsPath, err := path.ParsePath(*hash)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "ParsePath failure: %s", err)
+				os.Exit(1)
+			}
+			segments := ipfsPath.Segments()
+			*outFile = segments[len(segments)-1]
 		}
 
 		if err := get(*hash, *outFile); err != nil {
