@@ -19,13 +19,17 @@ import (
 func main() {
 	cmd := cli.App("ipget", "Retrieve and save IPFS objects.")
 	cmd.Spec = "IPFS_PATH [-o]"
+
 	hash := cmd.String(cli.StringArg{
 		Name:  "IPFS_PATH",
 		Value: "",
 		Desc:  "the IPFS object path",
 	})
+
 	outFile := cmd.StringOpt("o output", "", "output file path")
+
 	cmd.Action = func() {
+		// Use the final segment of the object's path if no path was given.
 		if *outFile == "" {
 			ipfsPath, err := path.ParsePath(*hash)
 			if err != nil {
@@ -37,9 +41,9 @@ func main() {
 		}
 
 		if err := get(*hash, *outFile); err != nil {
-			fmt.Fprintf(os.Stderr, "ipget failed: %s", err)
 			os.Remove(*outFile)
-			os.Exit(1)
+			fmt.Fprintf(os.Stderr, "ipget failed: %s\n", err)
+			os.Exit(2)
 		}
 	}
 	cmd.Run(os.Args)
@@ -48,19 +52,6 @@ func main() {
 func get(path, outFile string) error {
 	start := time.Now()
 	ctx, cancel := context.WithCancel(context.Background())
-	node, err := core.NewNode(ctx, &core.BuildCfg{
-		Online: true,
-	})
-	if err != nil {
-		return fmt.Errorf("ipfs NewNode() failed: %s", err)
-	}
-
-	err = node.Bootstrap(core.DefaultBootstrapConfig)
-	if err != nil {
-		return fmt.Errorf("node Bootstrap() failed: %s", err)
-	}
-
-	fmt.Fprintf(os.Stderr, "IPFS Node bootstrapping (took %v)\n", time.Since(start))
 
 	// Cancel the ipfs node context if the process gets interrupted or killed.
 	go func() {
@@ -70,30 +61,50 @@ func get(path, outFile string) error {
 		cancel()
 	}()
 
+	// Create the ipfs node.
+	node, err := core.NewNode(ctx, &core.BuildCfg{
+		Online: true,
+	})
+	if err != nil {
+		return fmt.Errorf("ipfs NewNode() failed: %s", err)
+	}
+
+	// Bootstrap.
+	err = node.Bootstrap(core.DefaultBootstrapConfig)
+	if err != nil {
+		return fmt.Errorf("node Bootstrap() failed: %s", err)
+	}
+	fmt.Fprintf(os.Stderr, "IPFS Node bootstrapping (took %v)\n", time.Since(start))
+
+	// Get a reader for downloading the object content.
 	reader, length, err := cat(node.Context(), node, path)
 	if err != nil {
 		return fmt.Errorf("cat failed: %s", err)
 	}
 
+	// Create the output file.
 	file, err := os.Create(outFile)
 	if err != nil {
 		return fmt.Errorf("Creating output file %q failed: %s", outFile, err)
 	}
 
+	// Rig up a progress bar.
 	bar := pb.New(int(length)).SetUnits(pb.U_BYTES)
 	bar.Output = os.Stderr
 	bar.ShowSpeed = false
 	bar.Start()
 	writer := io.MultiWriter(file, bar)
 
+	// Stream the file content from the IPFS node to the output file.
 	if _, err := io.Copy(writer, reader); err != nil {
 		return fmt.Errorf("copy failed: %s", err)
 	}
 
+	// Done!
 	bar.Finish()
-
 	fmt.Fprintf(os.Stderr, "Wrote %q to %q (%s) (took %v)\n", path, outFile,
 		humanize.Bytes(length), time.Since(start))
+
 	return nil
 }
 
