@@ -3,7 +3,7 @@ package log
 import (
 	"errors"
 
-	"github.com/ipfs/go-ipfs/Godeps/_workspace/src/golang.org/x/net/context"
+	"github.com/noffle/ipget/Godeps/_workspace/src/golang.org/x/net/context"
 )
 
 type key int

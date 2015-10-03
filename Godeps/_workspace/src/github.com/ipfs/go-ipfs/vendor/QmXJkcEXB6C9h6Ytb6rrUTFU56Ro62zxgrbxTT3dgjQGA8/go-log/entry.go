@@ -3,8 +3,8 @@ package log
 import (
 	"time"
 
-	"github.com/ipfs/go-ipfs/Godeps/_workspace/src/github.com/Sirupsen/logrus"
-	"github.com/ipfs/go-ipfs/util"
+	"github.com/noffle/ipget/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/util"
 )
 
 type entry struct {
