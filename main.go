@@ -83,14 +83,13 @@ func get(path, outFile string) error {
 		return fmt.Errorf("cat failed: %s", err)
 	}
 
-	bar := pb.New(int(length)).SetUnits(pb.U_BYTES)
-	bar.Output = os.Stderr
+	bar, barR := progressBarForReader(os.Stderr, reader, int(length))
 	bar.ShowSpeed = false
 	bar.Start()
 
 	// Stream the file content from the IPFS node to the output file.
 	extractor := &tar.Extractor{outFile}
-	if err := extractor.Extract(reader); err != nil {
+	if err := extractor.Extract(barR); err != nil {
 		return fmt.Errorf("copy failed: %s", err)
 	}
 
@@ -119,4 +118,12 @@ func cat(ctx context.Context, node *core.IpfsNode, fpath string) (io.Reader, uin
 		return nil, 0, err
 	}
 	return reader, length, nil
+}
+
+func progressBarForReader(out io.Writer, r io.Reader, l int) (*pb.ProgressBar, *pb.Reader) {
+	// setup bar reader
+	bar := pb.New(l).SetUnits(pb.U_BYTES)
+	bar.Output = out
+	barR := bar.NewProxyReader(r)
+	return bar, barR
 }
