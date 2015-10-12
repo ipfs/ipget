@@ -8,11 +8,12 @@ import (
 	"time"
 
 	pb "github.com/noffle/ipget/Godeps/_workspace/src/github.com/cheggaaa/pb"
-	"github.com/noffle/ipget/Godeps/_workspace/src/github.com/dustin/go-humanize"
+	humanize "github.com/noffle/ipget/Godeps/_workspace/src/github.com/dustin/go-humanize"
 	core "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core"
 	path "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/path"
-	uio "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/unixfs/io"
-	"github.com/noffle/ipget/Godeps/_workspace/src/github.com/jawher/mow.cli"
+	uarchive "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/unixfs/archive"
+	cli "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jawher/mow.cli"
+	tar "github.com/noffle/ipget/Godeps/_workspace/src/github.com/whyrusleeping/tar-utils"
 	context "github.com/noffle/ipget/Godeps/_workspace/src/golang.org/x/net/context"
 )
 
@@ -82,21 +83,13 @@ func get(path, outFile string) error {
 		return fmt.Errorf("cat failed: %s", err)
 	}
 
-	// Create the output file.
-	file, err := os.Create(outFile)
-	if err != nil {
-		return fmt.Errorf("Creating output file %q failed: %s", outFile, err)
-	}
-
-	// Rig up a progress bar.
-	bar := pb.New(int(length)).SetUnits(pb.U_BYTES)
-	bar.Output = os.Stderr
+	bar, barR := progressBarForReader(os.Stderr, reader, int(length))
 	bar.ShowSpeed = false
 	bar.Start()
-	writer := io.MultiWriter(file, bar)
 
 	// Stream the file content from the IPFS node to the output file.
-	if _, err := io.Copy(writer, reader); err != nil {
+	extractor := &tar.Extractor{outFile}
+	if err := extractor.Extract(barR); err != nil {
 		return fmt.Errorf("copy failed: %s", err)
 	}
 
@@ -114,10 +107,23 @@ func cat(ctx context.Context, node *core.IpfsNode, fpath string) (io.Reader, uin
 		return nil, 0, err
 	}
 
-	reader, err := uio.NewDagReader(ctx, dagnode, node.DAG)
+	reader, err := uarchive.DagArchive(node.Context(), dagnode, fpath, node.DAG, false, 0)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	return reader, reader.Size(), nil
+	// TODO: modify uarchive.DagArchive to output pb size
+	length, err := dagnode.Size()
+	if err != nil {
+		return nil, 0, err
+	}
+	return reader, length, nil
+}
+
+func progressBarForReader(out io.Writer, r io.Reader, l int) (*pb.ProgressBar, *pb.Reader) {
+	// setup bar reader
+	bar := pb.New(l).SetUnits(pb.U_BYTES)
+	bar.Output = out
+	barR := bar.NewProxyReader(r)
+	return bar, barR
 }

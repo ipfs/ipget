@@ -375,6 +375,10 @@
 			"Rev": "9e26222151125ecd3fc1fd190179b6bdd55f5608"
 		},
 		{
+			"ImportPath": "github.com/whyrusleeping/tar-utils",
+			"Rev": "e8a5890cfc9d59a203361237581468780d945b6e"
+		},
+		{
 			"ImportPath": "golang.org/x/crypto/blowfish",
 			"Rev": "c84e1f8e3a7e322d497cd16c0e8a13c7e127baf3"
 		},
