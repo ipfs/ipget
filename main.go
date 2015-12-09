@@ -118,6 +118,7 @@ func cat(ctx context.Context, node *core.IpfsNode, fpath string) (io.Reader, uin
 		return nil, 0, err
 	}
 	return reader, length, nil
+}
 
 func progressBarForReader(out io.Writer, r io.Reader, l int) (*pb.ProgressBar, *pb.Reader) {
 	// setup bar reader
