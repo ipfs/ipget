@@ -5,10 +5,10 @@ import (
 	"path"
 	"strings"
 
-	key "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/blocks/key"
+	key "github.com/ipfs/go-ipfs/blocks/key"
 
-	b58 "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/go-base58"
-	mh "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/go-multihash"
+	b58 "github.com/jbenet/go-base58"
+	mh "github.com/jbenet/go-multihash"
 )
 
 // ErrBadPath is returned when a given path is incorrectly formatted
@@ -101,4 +101,12 @@ func ParseKeyToPath(txt string) (Path, error) {
 func (p *Path) IsValid() error {
 	_, err := ParsePath(p.String())
 	return err
+}
+
+func Join(pths []string) string {
+	return strings.Join(pths, "/")
+}
+
+func SplitList(pth string) []string {
+	return strings.Split(pth, "/")
 }

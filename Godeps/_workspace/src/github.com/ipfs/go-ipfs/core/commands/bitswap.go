@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/noffle/ipget/Godeps/_workspace/src/github.com/dustin/go-humanize"
+
+	key "github.com/ipfs/go-ipfs/blocks/key"
 	cmds "github.com/ipfs/go-ipfs/commands"
-	key "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/blocks/key"
-	bitswap "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/exchange/bitswap"
-	peer "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/peer"
-	u "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/util"
+	bitswap "github.com/ipfs/go-ipfs/exchange/bitswap"
+	peer "github.com/ipfs/go-ipfs/p2p/peer"
+	u "github.com/ipfs/go-ipfs/util"
 )
 
 var BitswapCmd = &cmds.Command{
@@ -156,7 +158,7 @@ var bitswapStatCmd = &cmds.Command{
 			fmt.Fprintf(buf, "\tprovides buffer: %d / %d\n", out.ProvideBufLen, bitswap.HasBlockBufferSize)
 			fmt.Fprintf(buf, "\tblocks received: %d\n", out.BlocksReceived)
 			fmt.Fprintf(buf, "\tdup blocks received: %d\n", out.DupBlksReceived)
-			fmt.Fprintf(buf, "\tdup data received: %d\n", out.DupDataReceived)
+			fmt.Fprintf(buf, "\tdup data received: %s\n", humanize.Bytes(out.DupDataReceived))
 			fmt.Fprintf(buf, "\twantlist [%d keys]\n", len(out.Wantlist))
 			for _, k := range out.Wantlist {
 				fmt.Fprintf(buf, "\t\t%s\n", k.B58String())

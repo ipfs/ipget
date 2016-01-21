@@ -16,47 +16,49 @@ import (
 	"net"
 	"time"
 
-	diag "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/diagnostics"
-	metrics "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/metrics"
-	ic "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/crypto"
-	discovery "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/discovery"
-	p2phost "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/host"
-	p2pbhost "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/host/basic"
-	rhost "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/host/routed"
-	swarm "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/net/swarm"
-	addrutil "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/net/swarm/addr"
-	peer "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/peer"
-	ping "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/protocol/ping"
-	logging "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/vendor/go-log-v1.0.0"
-	b58 "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/go-base58"
-	ds "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/go-datastore"
-	ma "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/go-multiaddr"
-	goprocess "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/goprocess"
-	mamask "github.com/noffle/ipget/Godeps/_workspace/src/github.com/whyrusleeping/multiaddr-filter"
+	ds "github.com/ipfs/go-datastore"
+	diag "github.com/ipfs/go-ipfs/diagnostics"
+	metrics "github.com/ipfs/go-ipfs/metrics"
+	ic "github.com/ipfs/go-ipfs/p2p/crypto"
+	discovery "github.com/ipfs/go-ipfs/p2p/discovery"
+	p2phost "github.com/ipfs/go-ipfs/p2p/host"
+	p2pbhost "github.com/ipfs/go-ipfs/p2p/host/basic"
+	rhost "github.com/ipfs/go-ipfs/p2p/host/routed"
+	swarm "github.com/ipfs/go-ipfs/p2p/net/swarm"
+	addrutil "github.com/ipfs/go-ipfs/p2p/net/swarm/addr"
+	peer "github.com/ipfs/go-ipfs/p2p/peer"
+	ping "github.com/ipfs/go-ipfs/p2p/protocol/ping"
+	logging "github.com/ipfs/go-ipfs/vendor/QmQg1J6vikuXF9oDvm4wpdeAUvvkVEKW1EYDw9HhTMnP2b/go-log"
+	b58 "github.com/jbenet/go-base58"
+	ma "github.com/jbenet/go-multiaddr"
+	goprocess "github.com/jbenet/goprocess"
 	context "github.com/noffle/ipget/Godeps/_workspace/src/golang.org/x/net/context"
+	mamask "github.com/whyrusleeping/multiaddr-filter"
 
-	routing "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/routing"
-	dht "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/routing/dht"
-	nilrouting "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/routing/none"
-	offroute "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/routing/offline"
+	routing "github.com/ipfs/go-ipfs/routing"
+	dht "github.com/ipfs/go-ipfs/routing/dht"
+	nilrouting "github.com/ipfs/go-ipfs/routing/none"
+	offroute "github.com/ipfs/go-ipfs/routing/offline"
 
-	bstore "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/blocks/blockstore"
-	bserv "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/blockservice"
-	exchange "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/exchange"
-	bitswap "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/exchange/bitswap"
-	bsnet "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/exchange/bitswap/network"
-	rp "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/exchange/reprovide"
+	bstore "github.com/ipfs/go-ipfs/blocks/blockstore"
+	key "github.com/ipfs/go-ipfs/blocks/key"
+	bserv "github.com/ipfs/go-ipfs/blockservice"
+	exchange "github.com/ipfs/go-ipfs/exchange"
+	bitswap "github.com/ipfs/go-ipfs/exchange/bitswap"
+	bsnet "github.com/ipfs/go-ipfs/exchange/bitswap/network"
+	rp "github.com/ipfs/go-ipfs/exchange/reprovide"
+	mfs "github.com/ipfs/go-ipfs/mfs"
 
-	mount "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/fuse/mount"
-	ipnsfs "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/ipnsfs"
-	merkledag "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/merkledag"
-	namesys "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/namesys"
-	ipnsrp "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/namesys/republisher"
+	mount "github.com/ipfs/go-ipfs/fuse/mount"
+	merkledag "github.com/ipfs/go-ipfs/merkledag"
+	namesys "github.com/ipfs/go-ipfs/namesys"
+	ipnsrp "github.com/ipfs/go-ipfs/namesys/republisher"
+	pin "github.com/ipfs/go-ipfs/pin"
+	repo "github.com/ipfs/go-ipfs/repo"
+	config "github.com/ipfs/go-ipfs/repo/config"
+	uio "github.com/ipfs/go-ipfs/unixfs/io"
+	u "github.com/ipfs/go-ipfs/util"
 	path "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/path"
-	pin "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/pin"
-	repo "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/repo"
-	config "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/repo/config"
-	u "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/util"
 )
 
 const IpnsValidatorTag = "ipns"
@@ -90,12 +92,13 @@ type IpfsNode struct {
 
 	// Services
 	Peerstore  peer.Peerstore       // storage for other Peer instances
-	Blockstore bstore.Blockstore    // the block store (lower level)
+	Blockstore bstore.GCBlockstore  // the block store (lower level)
 	Blocks     *bserv.BlockService  // the block service, get/add blocks.
 	DAG        merkledag.DAGService // the merkle dag service, get/add objects.
 	Resolver   *path.Resolver       // the path resolution system
 	Reporter   metrics.Reporter
 	Discovery  discovery.Service
+	FilesRoot  *mfs.Root
 
 	// Online
 	PeerHost     p2phost.Host        // the network host (server+client)
@@ -107,8 +110,6 @@ type IpfsNode struct {
 	Ping         *ping.PingService
 	Reprovider   *rp.Reprovider // the value reprovider system
 	IpnsRepub    *ipnsrp.Republisher
-
-	IpnsFs *ipnsfs.Filesystem
 
 	proc goprocess.Process
 	ctx  context.Context
@@ -147,7 +148,7 @@ func (n *IpfsNode) startOnlineServices(ctx context.Context, routingOption Routin
 	for _, s := range cfg.Swarm.AddrFilters {
 		f, err := mamask.NewMask(s)
 		if err != nil {
-			return fmt.Errorf("incorrectly formatter address filter in config: %s", s)
+			return fmt.Errorf("incorrectly formatted address filter in config: %s", s)
 		}
 		addrfilter = append(addrfilter, f)
 	}
@@ -226,8 +227,13 @@ func (n *IpfsNode) startOnlineServicesWithHost(ctx context.Context, host p2phost
 	bitswapNetwork := bsnet.NewFromIpfsHost(n.PeerHost, n.Routing)
 	n.Exchange = bitswap.New(ctx, n.Identity, bitswapNetwork, n.Blockstore, alwaysSendToPeer)
 
+	size, err := n.getCacheSize()
+	if err != nil {
+		return err
+	}
+
 	// setup name system
-	n.Namesys = namesys.NewNameSystem(n.Routing, n.Repo.Datastore())
+	n.Namesys = namesys.NewNameSystem(n.Routing, n.Repo.Datastore(), size)
 
 	// setup ipns republishing
 	err = n.setupIpnsRepublisher()
@@ -236,6 +242,23 @@ func (n *IpfsNode) startOnlineServicesWithHost(ctx context.Context, host p2phost
 	}
 
 	return nil
+}
+
+// getCacheSize returns cache life and cache size
+func (n *IpfsNode) getCacheSize() (int, error) {
+	cfg, err := n.Repo.Config()
+	if err != nil {
+		return 0, err
+	}
+
+	cs := cfg.Ipns.ResolveCacheSize
+	if cs == 0 {
+		cs = 128
+	}
+	if cs < 0 {
+		return 0, fmt.Errorf("cannot specify negative resolve cache size")
+	}
+	return cs, nil
 }
 
 func (n *IpfsNode) setupIpnsRepublisher() error {
@@ -298,8 +321,14 @@ func (n *IpfsNode) teardown() error {
 	log.Debug("core is shutting down...")
 	// owned objects are closed in this teardown to ensure that they're closed
 	// regardless of which constructor was used to add them to the node.
-	closers := []io.Closer{
-		n.Repo,
+	var closers []io.Closer
+
+	// NOTE: the order that objects are added(closed) matters, if an object
+	// needs to use another during its shutdown/cleanup process, it should be
+	// closed before that other object
+
+	if n.FilesRoot != nil {
+		closers = append(closers, n.FilesRoot)
 	}
 
 	if n.Exchange != nil {
@@ -313,10 +342,8 @@ func (n *IpfsNode) teardown() error {
 		closers = append(closers, mount.Closer(n.Mounts.Ipns))
 	}
 
-	// Filesystem needs to be closed before network, dht, and blockservice
-	// so it can use them as its shutting down
-	if n.IpnsFs != nil {
-		closers = append(closers, n.IpnsFs)
+	if dht, ok := n.Routing.(*dht.IpfsDHT); ok {
+		closers = append(closers, dht.Process())
 	}
 
 	if n.Blocks != nil {
@@ -327,13 +354,12 @@ func (n *IpfsNode) teardown() error {
 		closers = append(closers, n.Bootstrapper)
 	}
 
-	if dht, ok := n.Routing.(*dht.IpfsDHT); ok {
-		closers = append(closers, dht.Process())
-	}
-
 	if n.PeerHost != nil {
 		closers = append(closers, n.PeerHost)
 	}
+
+	// Repo closed last, most things need to preserve state here
+	closers = append(closers, n.Repo)
 
 	var errs []error
 	for _, closer := range closers {
@@ -445,6 +471,41 @@ func (n *IpfsNode) loadBootstrapPeers() ([]peer.PeerInfo, error) {
 	return toPeerInfos(parsed), nil
 }
 
+func (n *IpfsNode) loadFilesRoot() error {
+	dsk := ds.NewKey("/local/filesroot")
+	pf := func(ctx context.Context, k key.Key) error {
+		return n.Repo.Datastore().Put(dsk, []byte(k))
+	}
+
+	var nd *merkledag.Node
+	val, err := n.Repo.Datastore().Get(dsk)
+
+	switch {
+	case err == ds.ErrNotFound || val == nil:
+		nd = uio.NewEmptyDirectory()
+		_, err := n.DAG.Add(nd)
+		if err != nil {
+			return fmt.Errorf("failure writing to dagstore: %s", err)
+		}
+	case err == nil:
+		k := key.Key(val.([]byte))
+		nd, err = n.DAG.Get(n.Context(), k)
+		if err != nil {
+			return fmt.Errorf("error loading filesroot from DAG: %s", err)
+		}
+	default:
+		return err
+	}
+
+	mr, err := mfs.NewRoot(n.Context(), n.DAG, nd, pf)
+	if err != nil {
+		return err
+	}
+
+	n.FilesRoot = mr
+	return nil
+}
+
 // SetupOfflineRouting loads the local nodes private key and
 // uses it to instantiate a routing system in offline mode.
 // This is primarily used for offline ipns modifications.
@@ -456,7 +517,12 @@ func (n *IpfsNode) SetupOfflineRouting() error {
 
 	n.Routing = offroute.NewOfflineRouter(n.Repo.Datastore(), n.PrivateKey)
 
-	n.Namesys = namesys.NewNameSystem(n.Routing, n.Repo.Datastore())
+	size, err := n.getCacheSize()
+	if err != nil {
+		return err
+	}
+
+	n.Namesys = namesys.NewNameSystem(n.Routing, n.Repo.Datastore(), size)
 
 	return nil
 }
@@ -543,14 +609,14 @@ func startListening(ctx context.Context, host p2phost.Host, cfg *config.Config) 
 	return nil
 }
 
-func constructDHTRouting(ctx context.Context, host p2phost.Host, dstore ds.ThreadSafeDatastore) (routing.IpfsRouting, error) {
+func constructDHTRouting(ctx context.Context, host p2phost.Host, dstore repo.Datastore) (routing.IpfsRouting, error) {
 	dhtRouting := dht.NewDHT(ctx, host, dstore)
 	dhtRouting.Validator[IpnsValidatorTag] = namesys.IpnsRecordValidator
 	dhtRouting.Selector[IpnsValidatorTag] = namesys.IpnsSelectorFunc
 	return dhtRouting, nil
 }
 
-type RoutingOption func(context.Context, p2phost.Host, ds.ThreadSafeDatastore) (routing.IpfsRouting, error)
+type RoutingOption func(context.Context, p2phost.Host, repo.Datastore) (routing.IpfsRouting, error)
 
 type DiscoveryOption func(p2phost.Host) (discovery.Service, error)
 

@@ -11,10 +11,10 @@ import (
 
 	cmds "github.com/ipfs/go-ipfs/commands"
 	ipns "github.com/ipfs/go-ipfs/fuse/ipns"
+	mount "github.com/ipfs/go-ipfs/fuse/mount"
 	rofs "github.com/ipfs/go-ipfs/fuse/readonly"
+	config "github.com/ipfs/go-ipfs/repo/config"
 	core "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core"
-	mount "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/fuse/mount"
-	config "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/repo/config"
 )
 
 // amount of time to wait for mount errors

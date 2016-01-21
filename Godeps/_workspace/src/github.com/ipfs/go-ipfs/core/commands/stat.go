@@ -10,10 +10,10 @@ import (
 	humanize "github.com/noffle/ipget/Godeps/_workspace/src/github.com/dustin/go-humanize"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
-	metrics "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/metrics"
-	peer "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/peer"
-	protocol "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/protocol"
-	u "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/util"
+	metrics "github.com/ipfs/go-ipfs/metrics"
+	peer "github.com/ipfs/go-ipfs/p2p/peer"
+	protocol "github.com/ipfs/go-ipfs/p2p/protocol"
+	u "github.com/ipfs/go-ipfs/util"
 )
 
 var StatsCmd = &cmds.Command{

@@ -9,11 +9,11 @@ import (
 	"time"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
+	peer "github.com/ipfs/go-ipfs/p2p/peer"
+	u "github.com/ipfs/go-ipfs/util"
 	core "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core"
-	peer "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/peer"
-	u "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/util"
 
-	ma "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/go-multiaddr"
+	ma "github.com/jbenet/go-multiaddr"
 	context "github.com/noffle/ipget/Godeps/_workspace/src/golang.org/x/net/context"
 )
 

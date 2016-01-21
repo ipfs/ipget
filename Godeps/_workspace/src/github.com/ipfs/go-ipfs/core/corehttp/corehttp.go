@@ -10,11 +10,11 @@ import (
 	"net/http"
 	"time"
 
+	logging "github.com/ipfs/go-ipfs/vendor/QmQg1J6vikuXF9oDvm4wpdeAUvvkVEKW1EYDw9HhTMnP2b/go-log"
+	ma "github.com/jbenet/go-multiaddr"
+	manet "github.com/jbenet/go-multiaddr-net"
+	"github.com/jbenet/goprocess"
 	core "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core"
-	logging "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/vendor/go-log-v1.0.0"
-	ma "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/go-multiaddr"
-	manet "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/go-multiaddr-net"
-	"github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/goprocess"
 )
 
 var log = logging.Logger("core/server")

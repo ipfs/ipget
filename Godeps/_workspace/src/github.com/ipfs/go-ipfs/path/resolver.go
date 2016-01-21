@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"time"
 
-	mh "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/go-multihash"
+	mh "github.com/jbenet/go-multihash"
 	"github.com/noffle/ipget/Godeps/_workspace/src/golang.org/x/net/context"
 
-	key "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/blocks/key"
-	merkledag "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/merkledag"
-	logging "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/vendor/go-log-v1.0.0"
+	key "github.com/ipfs/go-ipfs/blocks/key"
+	merkledag "github.com/ipfs/go-ipfs/merkledag"
+	logging "github.com/ipfs/go-ipfs/vendor/QmQg1J6vikuXF9oDvm4wpdeAUvvkVEKW1EYDw9HhTMnP2b/go-log"
 )
 
 var log = logging.Logger("path")
@@ -22,12 +22,12 @@ var ErrNoComponents = errors.New(
 
 // ErrNoLink is returned when a link is not found in a path
 type ErrNoLink struct {
-	name string
-	node mh.Multihash
+	Name string
+	Node mh.Multihash
 }
 
 func (e ErrNoLink) Error() string {
-	return fmt.Sprintf("no link named %q under %s", e.name, e.node.B58String())
+	return fmt.Sprintf("no link named %q under %s", e.Name, e.Node.B58String())
 }
 
 // Resolver provides path resolution to IPFS
@@ -124,7 +124,7 @@ func (s *Resolver) ResolveLinks(ctx context.Context, ndd *merkledag.Node, names 
 
 		if next == "" {
 			n, _ := nd.Multihash()
-			return result, ErrNoLink{name: name, node: n}
+			return result, ErrNoLink{Name: name, Node: n}
 		}
 
 		if nlink.Node == nil {

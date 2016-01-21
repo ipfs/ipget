@@ -6,8 +6,8 @@ import (
 	"io"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
+	u "github.com/ipfs/go-ipfs/util"
 	corerepo "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core/corerepo"
-	u "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/util"
 )
 
 var RepoCmd = &cmds.Command{

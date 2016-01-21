@@ -6,9 +6,9 @@ import (
 	"runtime"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
-	config "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/repo/config"
+	config "github.com/ipfs/go-ipfs/repo/config"
 
-	manet "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/go-multiaddr-net"
+	manet "github.com/jbenet/go-multiaddr-net"
 	sysi "github.com/whyrusleeping/go-sysinfo"
 )
 

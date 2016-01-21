@@ -3,10 +3,10 @@ package corenet
 import (
 	"time"
 
+	net "github.com/ipfs/go-ipfs/p2p/net"
+	peer "github.com/ipfs/go-ipfs/p2p/peer"
+	pro "github.com/ipfs/go-ipfs/p2p/protocol"
 	core "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core"
-	net "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/net"
-	peer "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/peer"
-	pro "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/protocol"
 	context "github.com/noffle/ipget/Godeps/_workspace/src/golang.org/x/net/context"
 )
 

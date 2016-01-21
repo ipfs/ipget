@@ -6,8 +6,9 @@ import (
 	"strings"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
-	namesys "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/namesys"
-	u "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/util"
+	namesys "github.com/ipfs/go-ipfs/namesys"
+	offline "github.com/ipfs/go-ipfs/routing/offline"
+	u "github.com/ipfs/go-ipfs/util"
 )
 
 var IpnsCmd = &cmds.Command{
@@ -44,6 +45,7 @@ Resolve the value of another name:
 	},
 	Options: []cmds.Option{
 		cmds.BoolOption("recursive", "r", "Resolve until the result is not an IPNS name"),
+		cmds.BoolOption("nocache", "n", "Do not used cached entries"),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 
@@ -61,8 +63,27 @@ Resolve the value of another name:
 			}
 		}
 
-		var name string
+		nocache, _, _ := req.Option("nocache").Bool()
+		local, _, _ := req.Option("local").Bool()
 
+		// default to nodes namesys resolver
+		var resolver namesys.Resolver = n.Namesys
+
+		if local && nocache {
+			res.SetError(errors.New("cannot specify both local and nocache"), cmds.ErrNormal)
+			return
+		}
+
+		if local {
+			offroute := offline.NewOfflineRouter(n.Repo.Datastore(), n.PrivateKey)
+			resolver = namesys.NewRoutingResolver(offroute, 0)
+		}
+
+		if nocache {
+			resolver = namesys.NewNameSystem(n.Routing, n.Repo.Datastore(), 0)
+		}
+
+		var name string
 		if len(req.Arguments()) == 0 {
 			if n.Identity == "" {
 				res.SetError(errors.New("Identity not loaded!"), cmds.ErrNormal)
@@ -80,7 +101,10 @@ Resolve the value of another name:
 			depth = namesys.DefaultDepthLimit
 		}
 
-		resolver := namesys.NewRoutingResolver(n.Routing)
+		if !strings.HasPrefix(name, "/ipns/") {
+			name = "/ipns/" + name
+		}
+
 		output, err := resolver.ResolveN(req.Context(), name, depth)
 		if err != nil {
 			res.SetError(err, cmds.ErrNormal)
@@ -97,7 +121,7 @@ Resolve the value of another name:
 			if !ok {
 				return nil, u.ErrCast()
 			}
-			return strings.NewReader(output.Path.String()), nil
+			return strings.NewReader(output.Path.String() + "\n"), nil
 		},
 	},
 	Type: ResolvedPath{},

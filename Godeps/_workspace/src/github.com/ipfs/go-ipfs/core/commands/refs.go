@@ -7,12 +7,12 @@ import (
 	"io"
 	"strings"
 
+	key "github.com/ipfs/go-ipfs/blocks/key"
 	cmds "github.com/ipfs/go-ipfs/commands"
-	key "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/blocks/key"
+	dag "github.com/ipfs/go-ipfs/merkledag"
+	u "github.com/ipfs/go-ipfs/util"
 	"github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core"
-	dag "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/merkledag"
 	path "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/path"
-	u "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/util"
 	context "github.com/noffle/ipget/Godeps/_workspace/src/golang.org/x/net/context"
 )
 

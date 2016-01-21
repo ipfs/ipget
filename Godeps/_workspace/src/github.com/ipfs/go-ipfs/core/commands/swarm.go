@@ -9,12 +9,12 @@ import (
 	"sort"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
-	swarm "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/net/swarm"
-	peer "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/peer"
-	iaddr "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/util/ipfsaddr"
+	swarm "github.com/ipfs/go-ipfs/p2p/net/swarm"
+	peer "github.com/ipfs/go-ipfs/p2p/peer"
+	iaddr "github.com/ipfs/go-ipfs/util/ipfsaddr"
 
-	ma "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/go-multiaddr"
-	mafilter "github.com/noffle/ipget/Godeps/_workspace/src/github.com/whyrusleeping/multiaddr-filter"
+	ma "github.com/jbenet/go-multiaddr"
+	mafilter "github.com/whyrusleeping/multiaddr-filter"
 )
 
 type stringList struct {
@@ -237,10 +237,10 @@ ipfs swarm connect /ip4/104.131.131.82/tcp/4001/ipfs/QmaCpDMGvV2BGHeYERUEnRQAwe3
 
 			err := n.PeerHost.Connect(ctx, pi)
 			if err != nil {
-				output[i] += " failure: " + err.Error()
-			} else {
-				output[i] += " success"
+				res.SetError(fmt.Errorf("%s failure: %s", output[i], err), cmds.ErrNormal)
+				return
 			}
+			output[i] += " success"
 		}
 
 		res.SetOutput(&stringList{output})

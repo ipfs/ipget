@@ -7,9 +7,9 @@ import (
 	"io"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
+	config "github.com/ipfs/go-ipfs/repo/config"
+	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
 	tour "github.com/ipfs/go-ipfs/tour"
-	config "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/repo/config"
-	fsrepo "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/repo/fsrepo"
 )
 
 var tourCmd = &cmds.Command{

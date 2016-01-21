@@ -5,20 +5,20 @@ import (
 	"encoding/base64"
 	"errors"
 
-	bstore "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/blocks/blockstore"
-	key "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/blocks/key"
-	bserv "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/blockservice"
-	offline "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/exchange/offline"
-	dag "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/merkledag"
-	ci "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/crypto"
-	peer "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/peer"
+	ds "github.com/ipfs/go-datastore"
+	dsync "github.com/ipfs/go-datastore/sync"
+	bstore "github.com/ipfs/go-ipfs/blocks/blockstore"
+	key "github.com/ipfs/go-ipfs/blocks/key"
+	bserv "github.com/ipfs/go-ipfs/blockservice"
+	offline "github.com/ipfs/go-ipfs/exchange/offline"
+	dag "github.com/ipfs/go-ipfs/merkledag"
+	ci "github.com/ipfs/go-ipfs/p2p/crypto"
+	peer "github.com/ipfs/go-ipfs/p2p/peer"
+	pin "github.com/ipfs/go-ipfs/pin"
+	repo "github.com/ipfs/go-ipfs/repo"
+	cfg "github.com/ipfs/go-ipfs/repo/config"
+	goprocessctx "github.com/jbenet/goprocess/context"
 	path "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/path"
-	pin "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/pin"
-	repo "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/repo"
-	cfg "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/repo/config"
-	ds "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/go-datastore"
-	dsync "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/go-datastore/sync"
-	goprocessctx "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/goprocess/context"
 	context "github.com/noffle/ipget/Godeps/_workspace/src/golang.org/x/net/context"
 )
 
@@ -63,7 +63,7 @@ func (cfg *BuildCfg) fillDefaults() error {
 	return nil
 }
 
-func defaultRepo(dstore ds.ThreadSafeDatastore) (repo.Repo, error) {
+func defaultRepo(dstore repo.Datastore) (repo.Repo, error) {
 	c := cfg.Config{}
 	priv, pub, err := ci.GenerateKeyPairWithReader(ci.RSA, 1024, rand.Reader)
 	if err != nil {
@@ -158,6 +158,11 @@ func setupNode(ctx context.Context, n *IpfsNode, cfg *BuildCfg) error {
 		n.Pinning = pin.NewPinner(n.Repo.Datastore(), n.DAG)
 	}
 	n.Resolver = &path.Resolver{DAG: n.DAG}
+
+	err = n.loadFilesRoot()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

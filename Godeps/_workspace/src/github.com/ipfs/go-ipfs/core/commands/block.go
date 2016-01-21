@@ -8,11 +8,11 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/ipfs/go-ipfs/blocks"
+	key "github.com/ipfs/go-ipfs/blocks/key"
 	cmds "github.com/ipfs/go-ipfs/commands"
-	"github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/blocks"
-	key "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/blocks/key"
-	u "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/util"
-	mh "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/go-multihash"
+	u "github.com/ipfs/go-ipfs/util"
+	mh "github.com/jbenet/go-multihash"
 )
 
 type BlockStat struct {

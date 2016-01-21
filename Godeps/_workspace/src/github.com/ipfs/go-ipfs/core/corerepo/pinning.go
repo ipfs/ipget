@@ -18,9 +18,9 @@ import (
 
 	context "github.com/noffle/ipget/Godeps/_workspace/src/golang.org/x/net/context"
 
-	key "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/blocks/key"
+	key "github.com/ipfs/go-ipfs/blocks/key"
+	"github.com/ipfs/go-ipfs/merkledag"
 	"github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core"
-	"github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/merkledag"
 	path "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/path"
 )
 

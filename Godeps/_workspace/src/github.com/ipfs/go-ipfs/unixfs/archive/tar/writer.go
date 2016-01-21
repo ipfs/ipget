@@ -6,13 +6,13 @@ import (
 	"path"
 	"time"
 
-	proto "github.com/noffle/ipget/Godeps/_workspace/src/github.com/gogo/protobuf/proto"
+	proto "github.com/gogo/protobuf/proto"
 	cxt "github.com/noffle/ipget/Godeps/_workspace/src/golang.org/x/net/context"
 
-	mdag "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/merkledag"
-	ft "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/unixfs"
-	uio "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/unixfs/io"
-	upb "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/unixfs/pb"
+	mdag "github.com/ipfs/go-ipfs/merkledag"
+	ft "github.com/ipfs/go-ipfs/unixfs"
+	uio "github.com/ipfs/go-ipfs/unixfs/io"
+	upb "github.com/ipfs/go-ipfs/unixfs/pb"
 )
 
 // Writer is a utility structure that helps to write

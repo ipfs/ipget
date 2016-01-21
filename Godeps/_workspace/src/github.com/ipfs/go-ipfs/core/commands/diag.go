@@ -9,7 +9,7 @@ import (
 	"time"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
-	diag "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/diagnostics"
+	diag "github.com/ipfs/go-ipfs/diagnostics"
 )
 
 type DiagnosticConnection struct {
@@ -46,6 +46,7 @@ var DiagCmd = &cmds.Command{
 
 	Subcommands: map[string]*cmds.Command{
 		"net": diagNetCmd,
+		"sys": sysDiagCmd,
 	},
 }
 

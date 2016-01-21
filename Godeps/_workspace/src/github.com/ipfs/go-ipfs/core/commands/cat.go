@@ -1,23 +1,17 @@
 package commands
 
 import (
-	"fmt"
 	"io"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
 	core "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core"
+	"github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core/corerepo"
 	coreunix "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core/coreunix"
 
-	"github.com/noffle/ipget/Godeps/_workspace/src/github.com/cheggaaa/pb"
 	context "github.com/noffle/ipget/Godeps/_workspace/src/golang.org/x/net/context"
 )
 
 const progressBarMinSize = 1024 * 1024 * 8 // show progress bar for outputs > 8MiB
-
-type clearlineReader struct {
-	io.Reader
-	out io.Writer
-}
 
 var CatCmd = &cmds.Command{
 	Helptext: cmds.HelpText{
@@ -38,12 +32,23 @@ it contains.
 			return
 		}
 
+		if !node.OnlineMode() {
+			if err := node.SetupOfflineRouting(); err != nil {
+				res.SetError(err, cmds.ErrNormal)
+				return
+			}
+		}
+
 		readers, length, err := cat(req.Context(), node, req.Arguments())
 		if err != nil {
 			res.SetError(err, cmds.ErrNormal)
 			return
 		}
 
+		if err := corerepo.ConditionalGC(req.Context(), node, length); err != nil {
+			res.SetError(err, cmds.ErrNormal)
+			return
+		}
 		res.SetLength(length)
 
 		reader := io.MultiReader(readers...)
@@ -54,12 +59,10 @@ it contains.
 			return
 		}
 
-		bar := pb.New(int(res.Length())).SetUnits(pb.U_BYTES)
-		bar.Output = res.Stderr()
+		bar, reader := progressBarForReader(res.Stderr(), res.Output().(io.Reader), int64(res.Length()))
 		bar.Start()
 
-		reader := bar.NewProxyReader(res.Output().(io.Reader))
-		res.SetOutput(&clearlineReader{reader, res.Stderr()})
+		res.SetOutput(reader)
 	},
 }
 
@@ -67,7 +70,7 @@ func cat(ctx context.Context, node *core.IpfsNode, paths []string) ([]io.Reader,
 	readers := make([]io.Reader, 0, len(paths))
 	length := uint64(0)
 	for _, fpath := range paths {
-		read, err := coreunix.Cat(node, fpath)
+		read, err := coreunix.Cat(ctx, node, fpath)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -75,12 +78,4 @@ func cat(ctx context.Context, node *core.IpfsNode, paths []string) ([]io.Reader,
 		length += uint64(read.Size())
 	}
 	return readers, length, nil
-}
-
-func (r *clearlineReader) Read(p []byte) (n int, err error) {
-	n, err = r.Reader.Read(p)
-	if err == io.EOF {
-		fmt.Fprintf(r.out, "\033[2K\r") // clear progress bar line on EOF
-	}
-	return
 }

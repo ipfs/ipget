@@ -5,8 +5,8 @@ import (
 	"net"
 	"net/http"
 
+	logging "github.com/ipfs/go-ipfs/vendor/QmQg1J6vikuXF9oDvm4wpdeAUvvkVEKW1EYDw9HhTMnP2b/go-log"
 	core "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core"
-	logging "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/vendor/go-log-v1.0.0"
 )
 
 type writeErrNotifier struct {
@@ -14,7 +14,7 @@ type writeErrNotifier struct {
 	errs chan error
 }
 
-func newWriteErrNotifier(w io.Writer) (io.Writer, <-chan error) {
+func newWriteErrNotifier(w io.Writer) (io.WriteCloser, <-chan error) {
 	ch := make(chan error, 1)
 	return &writeErrNotifier{
 		w:    w,
@@ -34,6 +34,14 @@ func (w *writeErrNotifier) Write(b []byte) (int, error) {
 		f.Flush()
 	}
 	return n, err
+}
+
+func (w *writeErrNotifier) Close() error {
+	select {
+	case w.errs <- io.EOF:
+	default:
+	}
+	return nil
 }
 
 func LogOption() ServeOption {

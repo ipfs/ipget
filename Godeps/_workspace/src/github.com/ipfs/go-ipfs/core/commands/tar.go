@@ -7,6 +7,7 @@ import (
 	cmds "github.com/ipfs/go-ipfs/commands"
 	tar "github.com/ipfs/go-ipfs/tar"
 	core "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core"
+	"github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core/coreunix"
 	path "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/path"
 )
 
@@ -58,16 +59,16 @@ var tarAddCmd = &cmds.Command{
 		}
 
 		fi.FileName()
-		res.SetOutput(&AddedObject{
+		res.SetOutput(&coreunix.AddedObject{
 			Name: fi.FileName(),
 			Hash: k.B58String(),
 		})
 	},
-	Type: AddedObject{},
+	Type: coreunix.AddedObject{},
 	Marshalers: cmds.MarshalerMap{
 		cmds.Text: func(res cmds.Response) (io.Reader, error) {
-			o := res.Output().(*AddedObject)
-			return strings.NewReader(o.Hash), nil
+			o := res.Output().(*coreunix.AddedObject)
+			return strings.NewReader(o.Hash + "\n"), nil
 		},
 	},
 }

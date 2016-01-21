@@ -8,10 +8,10 @@ import (
 	"text/tabwriter"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
+	unixfs "github.com/ipfs/go-ipfs/unixfs"
+	unixfspb "github.com/ipfs/go-ipfs/unixfs/pb"
 	core "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core"
 	path "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/path"
-	unixfs "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/unixfs"
-	unixfspb "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/unixfs/pb"
 )
 
 type LsLink struct {

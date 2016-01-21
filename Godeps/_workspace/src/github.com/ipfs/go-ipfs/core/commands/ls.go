@@ -7,11 +7,11 @@ import (
 	"text/tabwriter"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
+	merkledag "github.com/ipfs/go-ipfs/merkledag"
+	unixfs "github.com/ipfs/go-ipfs/unixfs"
+	unixfspb "github.com/ipfs/go-ipfs/unixfs/pb"
 	core "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core"
-	merkledag "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/merkledag"
 	path "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/path"
-	unixfs "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/unixfs"
-	unixfspb "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/unixfs/pb"
 )
 
 type LsLink struct {
@@ -44,7 +44,7 @@ it contains, with the following format:
 		cmds.StringArg("ipfs-path", true, true, "The path to the IPFS object(s) to list links from").EnableStdin(),
 	},
 	Options: []cmds.Option{
-		cmds.BoolOption("headers", "", "Print table headers (Hash, Name, Size)"),
+		cmds.BoolOption("headers", "v", "Print table headers (Hash, Name, Size)"),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		node, err := req.InvocContext().GetNode()

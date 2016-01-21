@@ -11,10 +11,10 @@ import (
 	"os/exec"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
-	repo "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/repo"
-	config "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/repo/config"
-	fsrepo "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/repo/fsrepo"
-	u "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/util"
+	repo "github.com/ipfs/go-ipfs/repo"
+	config "github.com/ipfs/go-ipfs/repo/config"
+	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
+	u "github.com/ipfs/go-ipfs/util"
 )
 
 type ConfigField struct {

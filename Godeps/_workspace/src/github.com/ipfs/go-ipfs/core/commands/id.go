@@ -8,15 +8,15 @@ import (
 	"io"
 	"strings"
 
-	b58 "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/go-base58"
+	b58 "github.com/jbenet/go-base58"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
+	ic "github.com/ipfs/go-ipfs/p2p/crypto"
+	"github.com/ipfs/go-ipfs/p2p/peer"
+	identify "github.com/ipfs/go-ipfs/p2p/protocol/identify"
+	kb "github.com/ipfs/go-ipfs/routing/kbucket"
+	u "github.com/ipfs/go-ipfs/util"
 	core "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core"
-	ic "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/crypto"
-	"github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/peer"
-	identify "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/p2p/protocol/identify"
-	kb "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/routing/kbucket"
-	u "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/util"
 )
 
 const offlineIdErrorMessage = `ID command fails when run without daemon, we are working to fix this.
@@ -53,7 +53,7 @@ ipfs id supports the format option for output with the following keys:
 		cmds.StringArg("peerid", false, false, "peer.ID of node to look up").EnableStdin(),
 	},
 	Options: []cmds.Option{
-		cmds.StringOption("f", "format", "optional output format"),
+		cmds.StringOption("format", "f", "optional output format"),
 	},
 	Run: func(req cmds.Request, res cmds.Response) {
 		node, err := req.InvocContext().GetNode()
@@ -62,21 +62,24 @@ ipfs id supports the format option for output with the following keys:
 			return
 		}
 
-		if len(req.Arguments()) == 0 {
+		var id peer.ID
+		if len(req.Arguments()) > 0 {
+			id = peer.ID(b58.Decode(req.Arguments()[0]))
+			if len(id) == 0 {
+				res.SetError(cmds.ClientError("Invalid peer id"), cmds.ErrClient)
+				return
+			}
+		} else {
+			id = node.Identity
+		}
+
+		if id == node.Identity {
 			output, err := printSelf(node)
 			if err != nil {
 				res.SetError(err, cmds.ErrNormal)
 				return
 			}
 			res.SetOutput(output)
-			return
-		}
-
-		pid := req.Arguments()[0]
-
-		id := peer.ID(b58.Decode(pid))
-		if len(id) == 0 {
-			res.SetError(cmds.ClientError("Invalid peer id"), cmds.ErrClient)
 			return
 		}
 

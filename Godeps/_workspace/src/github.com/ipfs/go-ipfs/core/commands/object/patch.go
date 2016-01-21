@@ -5,14 +5,14 @@ import (
 	"io/ioutil"
 	"strings"
 
+	key "github.com/ipfs/go-ipfs/blocks/key"
 	cmds "github.com/ipfs/go-ipfs/commands"
-	key "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/blocks/key"
+	dag "github.com/ipfs/go-ipfs/merkledag"
+	dagutils "github.com/ipfs/go-ipfs/merkledag/utils"
+	ft "github.com/ipfs/go-ipfs/unixfs"
+	u "github.com/ipfs/go-ipfs/util"
 	core "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core"
-	dag "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/merkledag"
-	dagutils "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/merkledag/utils"
 	path "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/path"
-	ft "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/unixfs"
-	u "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/util"
 )
 
 var ObjectPatchCmd = &cmds.Command{

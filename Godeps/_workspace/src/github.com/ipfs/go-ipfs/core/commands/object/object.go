@@ -11,13 +11,13 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	mh "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jbenet/go-multihash"
+	mh "github.com/jbenet/go-multihash"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
+	dag "github.com/ipfs/go-ipfs/merkledag"
+	ft "github.com/ipfs/go-ipfs/unixfs"
 	core "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core"
-	dag "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/merkledag"
 	path "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/path"
-	ft "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/unixfs"
 )
 
 // ErrObjectTooLarge is returned when too much data was read from stdin. current limit 512k

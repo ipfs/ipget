@@ -5,7 +5,7 @@ import (
 	"io"
 
 	cmds "github.com/ipfs/go-ipfs/commands"
-	logging "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/vendor/go-log-v1.0.0"
+	logging "github.com/ipfs/go-ipfs/vendor/QmQg1J6vikuXF9oDvm4wpdeAUvvkVEKW1EYDw9HhTMnP2b/go-log"
 )
 
 // Golang os.Args overrides * and replaces the character argument with
@@ -77,12 +77,13 @@ var logTailCmd = &cmds.Command{
 	},
 
 	Run: func(req cmds.Request, res cmds.Response) {
+		ctx := req.Context()
 		r, w := io.Pipe()
-		logging.WriterGroup.AddWriter(w)
 		go func() {
-			<-req.Context().Done()
-			w.Close()
+			defer w.Close()
+			<-ctx.Done()
 		}()
+		logging.WriterGroup.AddWriter(w)
 		res.SetOutput(r)
 	},
 }
