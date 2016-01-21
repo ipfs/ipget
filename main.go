@@ -7,14 +7,14 @@ import (
 	"os/signal"
 	"time"
 
-	pb "github.com/cheggaaa/pb"
-	humanize "github.com/dustin/go-humanize"
-	core "github.com/ipfs/go-ipfs/core"
-	path "github.com/ipfs/go-ipfs/path"
-	uarchive "github.com/ipfs/go-ipfs/unixfs/archive"
-	cli "github.com/jawher/mow.cli"
-	tar "github.com/whyrusleeping/tar-utils"
-	context "golang.org/x/net/context"
+	pb "github.com/noffle/ipget/Godeps/_workspace/src/github.com/cheggaaa/pb"
+	humanize "github.com/noffle/ipget/Godeps/_workspace/src/github.com/dustin/go-humanize"
+	core "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/core"
+	path "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/path"
+	uarchive "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/unixfs/archive"
+	cli "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jawher/mow.cli"
+	tar "github.com/noffle/ipget/Godeps/_workspace/src/github.com/whyrusleeping/tar-utils"
+	context "github.com/noffle/ipget/Godeps/_workspace/src/golang.org/x/net/context"
 )
 
 func main() {
