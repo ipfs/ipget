@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/Sirupsen/logrus"
-	"github.com/Sirupsen/logrus/hooks/airbrake"
+	"github.com/noffle/ipget/Godeps/_workspace/src/github.com/Sirupsen/logrus"
+	"github.com/noffle/ipget/Godeps/_workspace/src/github.com/Sirupsen/logrus/hooks/airbrake"
 )
 
 var log = logrus.New()

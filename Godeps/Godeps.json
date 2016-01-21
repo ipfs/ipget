@@ -1,9 +1,6 @@
 {
 	"ImportPath": "github.com/noffle/ipget",
 	"GoVersion": "go1.5.1",
-	"Packages": [
-		"./..."
-	],
 	"Deps": [
 		{
 			"ImportPath": "bazil.org/fuse",
@@ -13,6 +10,11 @@
 			"ImportPath": "bitbucket.org/ww/goautoneg",
 			"Comment": "null-5",
 			"Rev": "75cd24fc2f2c2a2088577d12123ddee5f54e0675"
+		},
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.7.3-2-g26709e2",
+			"Rev": "26709e2714106fb8ad40b773b711ebce25b78914"
 		},
 		{
 			"ImportPath": "github.com/beorn7/perks/quantile",
@@ -298,10 +300,6 @@
 			"Rev": "48959f1fad204b6cf2c0e8d086ef69f03f2de961"
 		},
 		{
-			"ImportPath": "github.com/jbenet/go-sockaddr/net",
-			"Rev": "da304f94eea1af8ba8d1faf184623e1f9d9777dc"
-		},
-		{
 			"ImportPath": "github.com/jbenet/go-stream-muxer",
 			"Rev": "4a97500beeb081571128d41d539787e137f18404"
 		},
@@ -328,6 +326,10 @@
 		{
 			"ImportPath": "github.com/mtchavez/jenkins",
 			"Rev": "5a816af6ef21ef401bff5e4b7dd255d63400f497"
+		},
+		{
+			"ImportPath": "github.com/olekukonko/ts",
+			"Rev": "ecf753e7c962639ab5a1fb46f7da627d4c0a04b8"
 		},
 		{
 			"ImportPath": "github.com/prometheus/client_golang/model",

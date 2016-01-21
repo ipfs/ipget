@@ -6,4 +6,4 @@ import _ "github.com/noffle/ipget/Godeps/_workspace/src/github.com/dustin/go-hum
 
 // imported by chegga/pb on windows, this is here so running godeps on non-windows doesnt
 // drop it from our vendoring
-import _ "github.com/olekukonko/ts"
+import _ "github.com/noffle/ipget/Godeps/_workspace/src/github.com/olekukonko/ts"
