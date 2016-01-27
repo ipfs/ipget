@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	path "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/path"
-	cli "github.com/noffle/ipget/Godeps/_workspace/src/github.com/jawher/mow.cli"
-	fallback "github.com/noffle/ipget/Godeps/_workspace/src/github.com/noffle/fallback-ipfs-shell"
+	path "github.com/ipfs/go-ipfs/path"
+	cli "github.com/jawher/mow.cli"
+	fallback "github.com/noffle/fallback-ipfs-shell"
 )
 
 func main() {
