@@ -1,0 +1,7 @@
+{
+  "name": "fallback-ipfs-shell",
+  "author": "Stephen Whitmore <sww@eight45.net>",
+  "version": "3.1.0",
+  "language": "go",
+  "issues_url": ""
+}
