@@ -53,7 +53,7 @@ func (s *Shell) Patch(root, action string, args ...string) (string, error) {
 		return "", err
 	}
 
-	e := dagutils.NewDagEditor(s.node.DAG, rootnd)
+	e := dagutils.NewDagEditor(rootnd, s.node.DAG)
 
 	switch action {
 	case "add-link":
@@ -62,7 +62,7 @@ func (s *Shell) Patch(root, action string, args ...string) (string, error) {
 			return "", err
 		}
 
-		err = e.WriteOutputTo(s.node.DAG)
+		_, err = e.Finalize(s.node.DAG)
 		if err != nil {
 			return "", err
 		}
@@ -100,7 +100,7 @@ func (s *Shell) PatchLink(root, npath, childhash string, create bool) (string, e
 		return "", err
 	}
 
-	e := dagutils.NewDagEditor(s.node.DAG, rootnd)
+	e := dagutils.NewDagEditor(rootnd, s.node.DAG)
 	err = e.InsertNodeAtPath(s.ctx, npath, nnode, func() *dag.Node {
 		return &dag.Node{Data: ft.FolderPBData()}
 	})
@@ -108,7 +108,7 @@ func (s *Shell) PatchLink(root, npath, childhash string, create bool) (string, e
 		return "", err
 	}
 
-	err = e.WriteOutputTo(s.node.DAG)
+	_, err = e.Finalize(s.node.DAG)
 	if err != nil {
 		return "", err
 	}

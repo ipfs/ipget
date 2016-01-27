@@ -7,7 +7,7 @@ import (
 
 	api "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs-api"
 	fsrepo "github.com/noffle/ipget/Godeps/_workspace/src/github.com/ipfs/go-ipfs/repo/fsrepo"
-	embedded "github.com/noffle/ipget/Godeps/_workspace/src/github.com/whyrusleeping/ipfs-embedded-shell"
+	embedded "github.com/noffle/ipget/Godeps/_workspace/src/github.com/noffle/ipfs-embedded-shell"
 	context "github.com/noffle/ipget/Godeps/_workspace/src/golang.org/x/net/context"
 )
 

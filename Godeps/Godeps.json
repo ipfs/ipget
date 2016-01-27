@@ -380,7 +380,11 @@
 		},
 		{
 			"ImportPath": "github.com/noffle/fallback-ipfs-shell",
-			"Rev": "73d0112362db5a5f451887cc06578adece8906c3"
+			"Rev": "c1641160be1fc8341f43603f32a0d7c8fcaae5f1"
+		},
+		{
+			"ImportPath": "github.com/noffle/ipfs-embedded-shell",
+			"Rev": "865e368a35b109c05b1291bc73200ff78c16eaac"
 		},
 		{
 			"ImportPath": "github.com/prometheus/client_golang/model",
@@ -446,10 +450,6 @@
 		{
 			"ImportPath": "github.com/whyrusleeping/go-multistream",
 			"Rev": "31bb014803a6eba2261bda5593e42c016a5f33bb"
-		},
-		{
-			"ImportPath": "github.com/whyrusleeping/ipfs-embedded-shell",
-			"Rev": "2b065d6583ea9cc7a6511eff626a6c829071bb7c"
 		},
 		{
 			"ImportPath": "github.com/whyrusleeping/multiaddr-filter",

@@ -15,7 +15,6 @@ func (s *Shell) Add(r io.Reader) (string, error) {
 	dag, err := importer.BuildDagFromReader(
 		s.node.DAG,
 		chunk.DefaultSplitter(r),
-		importer.BasicPinnerCB(s.node.Pinning.GetManual()), // TODO: make pinning configurable
 	)
 	if err != nil {
 		return "", errgo.Notef(err, "add: importing DAG failed.")
