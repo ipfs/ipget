@@ -4,33 +4,40 @@ import (
 	"fmt"
 	"os"
 
+	cli "github.com/codegangsta/cli"
 	path "github.com/ipfs/go-ipfs/path"
-	cli "github.com/jawher/mow.cli"
-	fallback "github.com/noffle/fallback-ipfs-shell"
+	fallback "github.com/whyrusleeping/fallback-ipfs-shell"
 )
 
 func main() {
-	cmd := cli.App("ipget", "Retrieve and save IPFS objects.")
-	cmd.Spec = "IPFS_PATH [-o]"
+	app := cli.NewApp()
+	app.Name = "ipget"
+	app.Usage = "Retrieve and save IPFS objects."
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:  "output,o",
+			Usage: "specify output location",
+		},
+	}
 
-	hash := cmd.String(cli.StringArg{
-		Name:  "IPFS_PATH",
-		Value: "",
-		Desc:  "the IPFS object path",
-	})
+	app.Action = func(c *cli.Context) {
+		if !c.Args().Present() {
+			fmt.Fprintf(os.Stderr, "usage: ipget <ipfs ref>\n")
+			os.Exit(1)
+		}
 
-	outFile := cmd.StringOpt("o output", "", "output file path")
+		outfile := c.String("output")
+		arg := c.Args().First()
 
-	cmd.Action = func() {
 		// Use the final segment of the object's path if no path was given.
-		if *outFile == "" {
-			ipfsPath, err := path.ParsePath(*hash)
+		if outfile == "" {
+			ipfsPath, err := path.ParsePath(arg)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "ParsePath failure: %s", err)
+				fmt.Fprintf(os.Stderr, "ParsePath failure: %s\n", err)
 				os.Exit(1)
 			}
 			segments := ipfsPath.Segments()
-			*outFile = segments[len(segments)-1]
+			outfile = segments[len(segments)-1]
 		}
 
 		shell, err := fallback.NewShell()
@@ -39,11 +46,12 @@ func main() {
 			os.Exit(1)
 		}
 
-		if err = shell.Get(*hash, *outFile); err != nil {
-			os.Remove(*outFile)
+		if err := shell.Get(arg, outfile); err != nil {
+			os.Remove(outfile)
 			fmt.Fprintf(os.Stderr, "ipget failed: %s\n", err)
 			os.Exit(2)
 		}
 	}
-	cmd.Run(os.Args)
+
+	app.RunAndExitOnError()
 }
