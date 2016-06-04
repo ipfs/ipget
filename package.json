@@ -1,0 +1,20 @@
+{
+  "author": "Stephen Whitmore <noffle@ipfs.io>",
+  "bugs": {},
+  "gx": {
+    "dvcsimport": "github.com/ipfs/ipget"
+  },
+  "gxDependencies": [
+    {
+      "author": "Stephen Whitmore <noffle@ipfs.io>",
+      "hash": "QmWTqqu1PAaFNm3gFjksZD6yiChfChJetSzc1w84f525Tg",
+      "name": "fallback-ipfs-shell",
+      "version": "3.1.0"
+    }
+  ],
+  "gxVersion": "0.7.0",
+  "language": "go",
+  "license": "",
+  "name": "ipget",
+  "version": "0.0.0"
+}
