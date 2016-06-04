@@ -20,7 +20,7 @@ func main() {
 		},
 	}
 
-	app.Action = func(c *cli.Context) {
+	app.Action = func(c *cli.Context) error {
 		if !c.Args().Present() {
 			fmt.Fprintf(os.Stderr, "usage: ipget <ipfs ref>\n")
 			os.Exit(1)
@@ -51,7 +51,9 @@ func main() {
 			fmt.Fprintf(os.Stderr, "ipget failed: %s\n", err)
 			os.Exit(2)
 		}
+
+		return nil
 	}
 
-	app.RunAndExitOnError()
+	app.Run(os.Args)
 }
