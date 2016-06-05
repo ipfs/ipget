@@ -35,6 +35,9 @@ path_check:
 
 deps: go_check gx_check path_check
 	${gx_bin} --verbose install --global
+	go get -d github.com/ipfs/go-ipfs
+	cd ${GOPATH}/src/github.com/ipfs/go-ipfs && gx install --global
+	cd ipget && go get
 
 install: deps
 	cd ipget && go install
