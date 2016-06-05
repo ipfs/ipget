@@ -4,14 +4,12 @@ IPFS_MIN_GX_VERSION = 0.6
 IPFS_MIN_GX_GO_VERSION = 1.1
 
 dist_root=/ipfs/QmXZQzBAFuoELw3NtjQZHkWSdA332PyQUj6pQjuhEukvg8
-gx_bin=$(pwd)/bin/gx-v0.7.0
-gx-go_bin=$(pwd)/bin/gx-go-v1.2.0
+gx_bin=bin/gx-v0.7.0
+gx-go_bin=bin/gx-go-v1.2.0
 
 # use things in our bin before any other system binaries
 export PATH := bin:$(PATH)
 export IPFS_API ?= v04x.ipfs.io
-
-all: help
 
 go_check:
 	@bin/check_go_version $(IPFS_MIN_GO_VERSION)
@@ -35,8 +33,7 @@ path_check:
 
 deps: go_check gx_check path_check
 	${gx_bin} --verbose install --global
-	go get -d github.com/ipfs/go-ipfs
-	cd ${GOPATH}/src/github.com/ipfs/go-ipfs && ${gx_bin} install --global
+	bin/setup_go-ipfs
 	cd ipget && go get
 
 install: deps
@@ -51,7 +48,7 @@ clean:
 uninstall:
 	go clean github.com/ipfs/ipget
 
-PHONY += all help gx_check
+PHONY += help gx_check
 PHONY += go_check deps install build clean
 
 ##############################################################
@@ -65,7 +62,7 @@ help:
 	@echo ''
 	@echo 'BUILD TARGETS:'
 	@echo ''
-	@echo '  all          - print this help message'
+	@echo '  help         - print this help message'
 	@echo '  build        - Build binary'
 	@echo '  install      - Build binary and install into $$GOPATH/bin'
 	@echo ''
