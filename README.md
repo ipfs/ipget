@@ -8,12 +8,12 @@ system. This makes it ideal for users and projects that want a simple utility
 for whenever they want to retrieve files from IPFS.
 
 
-# Install
+## Install
 
 Download a binary for your platform from [IPFS Distributions](https://dist.ipfs.io/#ipget).
 
 
-# Install From Source
+## Install From Source
 
 `ipget` doesn't use the vanilla Go package management system. It instead uses
 the [gx](https://github.com/whyrusleeping/gx) (and
@@ -29,7 +29,7 @@ $ make install
 ```
 
 
-# Example
+## Example
 
 Find a fun IPFS address and `ipget` away!
 
@@ -46,7 +46,7 @@ $ ipget /ipns/QmQG1kwx91YQsGcsa9Z1p6BPJ3amdiSLLmsmAoEMwbX61b/files/cat2.gif -o n
 ```
 
 
-# Usage
+## Usage
 ```
 Usage: ipget IPFS_PATH [-o]
 
@@ -58,3 +58,8 @@ Arguments:
 Options:
   -o, --output=""   output file path
 ```
+
+
+## License
+
+MIT
