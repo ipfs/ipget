@@ -37,10 +37,10 @@ deps: go_check gx_check path_check
 	${gx_bin} --verbose install --global
 
 install: deps
-	cd src && go install
+	cd ipget && go install
 
 build: deps
-	cd src && go build && mv ipget ..
+	cd ipget && go build
 
 clean:
 	rm -rf ./ipget
