@@ -3,13 +3,6 @@ IPFS_MIN_GO_VERSION = 1.5.2
 IPFS_MIN_GX_VERSION = 0.6
 IPFS_MIN_GX_GO_VERSION = 1.1
 
-ifeq ($(TEST_NO_FUSE),1)
-  go_test=go test -tags nofuse
-else
-  go_test=go test
-endif
-
-
 dist_root=/ipfs/QmXZQzBAFuoELw3NtjQZHkWSdA332PyQUj6pQjuhEukvg8
 gx_bin=bin/gx-v0.7.0
 gx-go_bin=bin/gx-go-v1.2.0
