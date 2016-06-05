@@ -1,22 +1,24 @@
 [![Build Status](https://secure.travis-ci.org/ipfs/ipget.png?branch=master)](http://travis-ci.org/ipfs/ipget)
 
-# Why ipget?
 
-The IPFS CLI offers an `ipfs get` command that is very similar to `ipget`. Why bother with this utility? Well,
+`ipget` is a standalone program analogous to [GNU `wget`](https://www.gnu.org/software/wget/). Unlike wget though, `ipget` specializes in downloading files and directory structures from the [IPFS network](https://ipfs.io).
 
-1. `ipget` has no dependencies: it's just a standalone binary. This makes it
-   great for including in distributions.
-2. `ipget` doesn't require an IPFS daemon to be running. (Though it will use it if available.)
-
-This makes it ideal for users and projects that want a simple dependency-free utility that will Just Work(tm) whenever they want to retrieve files from IPFS with minimal fuss.
+`ipget` includes its own IPFS node, so you don't need IPFS installed on your
+system. This makes it ideal for users and projects that want a simple utility
+for whenever they want to retrieve files from IPFS.
 
 
 # Install
 
-Grab a binary for your platform at https://dist.ipfs.io/#ipget
+Download a binary for your platform from [IPFS Distributions](https://dist.ipfs.io/#ipget).
 
 
 # Install From Source
+
+`ipget` doesn't use the vanilla Go package management system. It instead uses
+the [gx](https://github.com/whyrusleeping/gx) (and
+[gx-go](https://github.com/whyrusleeping/gx-go)) workflow. This means a slightly
+different set of steps to install:
 
 ```
 $ go get -d github.com/ipfs/ipget
@@ -32,11 +34,11 @@ $ make install
 Find a fun IPFS address and `ipget` away!
 
 ```
-$ ipget QmTJHuzG3mjgmvcfvTU4ykWXwD4QjA5aCk6QsU4BPaD8Hh/cat2.gif -o nyan.gif
+$ ipget QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat2.gif -o nyan.gif
 ```
 or with an `/ipfs` prefix:
 ```
-$ ipget /ipfs/QmTJHuzG3mjgmvcfvTU4ykWXwD4QjA5aCk6QsU4BPaD8Hh/cat2.gif -o nyan.gif
+$ ipget /ipfs/QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat2.gif -o nyan.gif
 ```
 or even IPNS addresses:
 ```
