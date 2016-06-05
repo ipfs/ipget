@@ -37,10 +37,10 @@ deps: go_check gx_check path_check
 	${gx_bin} --verbose install --global
 
 install: deps
-	go install
+	cd src && go install
 
 build: deps
-	go build
+	cd src && go build && mv ipget ..
 
 clean:
 	rm -rf ./ipget
@@ -49,7 +49,7 @@ uninstall:
 	go clean github.com/ipfs/ipget
 
 PHONY += all help gx_check
-PHONY += go_check deps install build nofuse clean uninstall
+PHONY += go_check deps install build clean
 
 ##############################################################
 # A semi-helpful help message
@@ -69,7 +69,6 @@ help:
 	@echo 'CLEANING TARGETS:'
 	@echo ''
 	@echo '  clean        - Remove binary from build directory'
-	@echo '  uninstall    - Remove binary from $$GOPATH/bin'
 	@echo ''
 	@echo 'TESTING TARGETS:'
 	@echo ''
