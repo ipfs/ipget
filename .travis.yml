@@ -8,6 +8,6 @@ go:
     - 1.5.1
 
 script:
-  - go build
+  - make build
 
 sudo: false
