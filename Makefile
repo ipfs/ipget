@@ -4,8 +4,8 @@ IPFS_MIN_GX_VERSION = 0.6
 IPFS_MIN_GX_GO_VERSION = 1.1
 
 dist_root=/ipfs/QmXZQzBAFuoELw3NtjQZHkWSdA332PyQUj6pQjuhEukvg8
-gx_bin=bin/gx-v0.7.0
-gx-go_bin=bin/gx-go-v1.2.0
+gx_bin=$(pwd)/bin/gx-v0.7.0
+gx-go_bin=$(pwd)/bin/gx-go-v1.2.0
 
 # use things in our bin before any other system binaries
 export PATH := bin:$(PATH)
