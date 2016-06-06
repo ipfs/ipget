@@ -48,15 +48,20 @@ $ ipget /ipns/QmQG1kwx91YQsGcsa9Z1p6BPJ3amdiSLLmsmAoEMwbX61b/files/cat.gif -o ny
 
 ## Usage
 ```
-Usage: ipget IPFS_PATH [-o]
+NAME:
+   ipget - Retrieve and save IPFS objects.
 
-Retrieve and save IPFS objects.
+USAGE:
+   ipget [global options] command [command options] [arguments...]
 
-Arguments:
-  IPFS_PATH=""   the IPFS object path
+VERSION:
+   0.0.0
 
-Options:
-  -o, --output=""   output file path
+COMMANDS:
+GLOBAL OPTIONS:
+   --output value, -o value  specify output location
+   --help, -h                show help
+   --version, -v             print the version
 ```
 
 
