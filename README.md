@@ -34,15 +34,15 @@ $ make install
 Find a fun IPFS address and `ipget` away!
 
 ```
-$ ipget QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat2.gif -o nyan.gif
+$ ipget QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat.gif -o nyan.gif
 ```
 or with an `/ipfs` prefix:
 ```
-$ ipget /ipfs/QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat2.gif -o nyan.gif
+$ ipget /ipfs/QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat.gif -o nyan.gif
 ```
 or even IPNS addresses:
 ```
-$ ipget /ipns/QmQG1kwx91YQsGcsa9Z1p6BPJ3amdiSLLmsmAoEMwbX61b/files/cat2.gif -o nyan.gif
+$ ipget /ipns/QmQG1kwx91YQsGcsa9Z1p6BPJ3amdiSLLmsmAoEMwbX61b/files/cat.gif -o nyan.gif
 ```
 
 
