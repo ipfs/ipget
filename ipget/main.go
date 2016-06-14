@@ -6,7 +6,7 @@ import (
 
 	cli "github.com/codegangsta/cli"
 	path "github.com/ipfs/go-ipfs/path"
-	fallback "gx/ipfs/QmTgXW4YdmqzesTvAZzSBWawoc1MdBoXLtYM1VY1WkLUxg/fallback-ipfs-shell"
+	fallback "gx/ipfs/QmNXee9ywLsmjNb8SgHcXUNzauJivTp5LK5qp6hDb5ELT1/fallback-ipfs-shell"
 )
 
 func main() {
