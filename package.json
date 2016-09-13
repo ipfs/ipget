@@ -7,9 +7,9 @@
   "gxDependencies": [
     {
       "author": "Stephen Whitmore <noffle@ipfs.io>",
-      "hash": "QmSnF25VmgzvUv4rzJtP3o13QVobjsR95HxD1oC6ycqQrZ",
+      "hash": "QmNpqXF6nNKesQgzCptL9GhMTw4QzWnid2evwT5TVU9zXC",
       "name": "fallback-ipfs-shell",
-      "version": "3.1.0"
+      "version": "3.1.2"
     }
   ],
   "gxVersion": "0.7.0",
