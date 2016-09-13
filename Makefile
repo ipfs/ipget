@@ -34,13 +34,13 @@ path_check:
 deps: go_check gx_check path_check
 	${gx_bin} --verbose install --global
 	bin/setup_go-ipfs
-	cd ipget && go get
+	go get
 
 install: deps
-	cd ipget && go install
+	go install
 
 build: deps
-	cd ipget && go build
+	go build
 
 clean:
 	rm -rf ./ipget
