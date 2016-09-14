@@ -19,6 +19,11 @@ test_expect_success "retrieve a known popular file with -o" "
 "
 
 # TODO(noffle): recursive retrieval (directory)
+test_expect_success "retrieve a directory" "
+    ipget QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF &&
+    ls QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF > /dev/null &&
+    ls QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat.gif > /dev/null
+"
 
 # TODO(noffle): start a daemon, add + fetch a unique hash from it
 
