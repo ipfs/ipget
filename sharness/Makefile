@@ -14,7 +14,7 @@ AGGREGATE = $(LIBDIR)/$(SHARNESSDIR)/aggregate-results.sh
 # Add below the binaries that this project generates or needs.
 # For example:
 # BINS = bin/ipfs
-BINS =
+BINS = bin/ipget
 
 all: aggregate
 
@@ -44,6 +44,9 @@ deps: sharness $(BINS)
 sharness:
 	@echo "*** checking $@ ***"
 	lib/install-sharness.sh
+
+bin/ipget:
+	go build -o bin/ipget github.com/ipfs/ipget
 
 # Add below other targets like:
 # - the targets needed to build binaries,
