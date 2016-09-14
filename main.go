@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	cli "github.com/codegangsta/cli"
 	path "github.com/ipfs/go-ipfs/path"
@@ -55,6 +57,14 @@ func main() {
 
 		return nil
 	}
+
+	// Catch interrupt signal
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-sigs
+		os.Exit(1)
+	}()
 
 	app.Run(os.Args)
 }
