@@ -43,11 +43,11 @@ $ ipget QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat.gif -o nyan.gif
 ```
 or with an `/ipfs` prefix:
 ```
-$ ipget /ipfs/QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat.gif -o nyan.gif
+$ ipget -o nyan.gif /ipfs/QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat.gif
 ```
 or even IPNS addresses:
 ```
-$ ipget /ipns/QmQG1kwx91YQsGcsa9Z1p6BPJ3amdiSLLmsmAoEMwbX61b/files/cat.gif -o nyan.gif
+$ ipget /ipns/QmQG1kwx91YQsGcsa9Z1p6BPJ3amdiSLLmsmAoEMwbX61b/files/cat.gif
 ```
 
 
