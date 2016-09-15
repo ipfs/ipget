@@ -6,7 +6,7 @@ import (
 
 	cli "github.com/codegangsta/cli"
 	path "github.com/ipfs/go-ipfs/path"
-	fallback "gx/ipfs/QmNpqXF6nNKesQgzCptL9GhMTw4QzWnid2evwT5TVU9zXC/fallback-ipfs-shell"
+	fallback "gx/ipfs/QmXEk5yvscBkRAMLpHiCVkUoLrXYBkFrbNaiWprocDKS7Z/fallback-ipfs-shell"
 )
 
 func main() {
@@ -18,6 +18,11 @@ func main() {
 		cli.StringFlag{
 			Name:  "output,o",
 			Usage: "specify output location",
+		},
+		cli.StringFlag{
+			Name:  "node,n",
+			Usage: "specify ipfs node strategy ('local', 'spawn', or 'fallback')",
+			Value: "fallback",
 		},
 	}
 
@@ -41,10 +46,31 @@ func main() {
 			outfile = segments[len(segments)-1]
 		}
 
-		shell, err := fallback.NewShell()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %s\n", err)
+		var shell fallback.Shell
+		var err error
+
+		if c.String("node") == "fallback" {
+			shell, err = fallback.NewShell()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %s\n", err)
+				os.Exit(1)
+			}
+		} else if c.String("node") == "spawn" {
+			shell, err = fallback.NewEmbeddedShell()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %s\n", err)
+				os.Exit(1)
+			}
+		} else if c.String("node") == "local" {
+			shell, err = fallback.NewApiShell()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %s\n", err)
+				os.Exit(1)
+			}
+		} else {
+			fmt.Fprintf(os.Stderr, "error: no such 'node' strategy, '%s'\n", c.String("node"))
 			os.Exit(1)
+			return nil
 		}
 
 		if err := shell.Get(arg, outfile); err != nil {
