@@ -7,7 +7,7 @@
 # NOTE: run with TEST_VERBOSE=1 for verbose sharness tests.
 
 T = $(sort $(wildcard t[0-9][0-9][0-9][0-9]-*.sh))
-BINS = bin/ipget bin/gx bin/ipfs bin/go-sleep bin/pollEndpoint
+BINS = bin/ipget bin/ipfs bin/go-sleep bin/pollEndpoint
 SHARNESS = lib/sharness/sharness.sh
 
 find_go_files = $(shell find $(1) -name "*.go")
@@ -41,9 +41,6 @@ $(SHARNESS): FORCE
 
 bin/ipget:
 	go build -o bin/ipget github.com/ipfs/ipget
-
-bin/gx: $(call find_go_files, ../)
-	go build -o bin/gx github.com/whyrusleeping/gx
 
 bin/ipfs:
 	mkdir -p bin
