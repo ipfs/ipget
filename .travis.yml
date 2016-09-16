@@ -9,6 +9,6 @@ go:
 
 script:
   - make build
-  - cd sharness && make
+  - cd sharness && TEST_VERBOSE=1 make
 
 sudo: false
