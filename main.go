@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	cli "github.com/codegangsta/cli"
@@ -92,5 +93,45 @@ func main() {
 		os.Exit(1)
 	}()
 
+	// TODO(noffle): remove this once https://github.com/urfave/cli/issues/427 is
+	// fixed.
+	movePostfixOptions(os.Args)
+
 	app.Run(os.Args)
+}
+
+// movePostfixOptions finds the Qmfoobar hash argument and moves it to the end
+// of the argument array.
+func movePostfixOptions(args []string) {
+	var idx = 1
+	the_args := make([]string, 0)
+	for {
+		if idx >= len(args) {
+			break
+		}
+
+		fmt.Println("FOO 1", args[idx], idx)
+		if args[idx][0] == '-' {
+			if !strings.Contains(args[idx], "=") {
+				idx++
+			}
+		} else {
+			// add to args accumulator
+			the_args = append(the_args, args[idx])
+
+			// remove from real args list
+			new_args := make([]string, 0)
+			new_args = append(new_args, args[:idx]...)
+			new_args = append(new_args, args[idx+1:]...)
+			args = new_args
+			idx--
+		}
+
+		idx++
+	}
+
+	// append extracted arguments to the real args
+	args = append(args, the_args...)
+
+	fmt.Println(args)
 }
