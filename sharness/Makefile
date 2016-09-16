@@ -1,28 +1,25 @@
-# Run sharness tests
+# Run tests
 #
 # Copyright (c) 2014 Christian Couder
 # MIT Licensed; see the LICENSE file in this repository.
 #
+
 # NOTE: run with TEST_VERBOSE=1 for verbose sharness tests.
 
 T = $(sort $(wildcard t[0-9][0-9][0-9][0-9]-*.sh))
-LIBDIR = lib
-SHARNESSDIR = sharness
-AGGREGATE = $(LIBDIR)/$(SHARNESSDIR)/aggregate-results.sh
+BINS = bin/ipget bin/ipfs bin/go-sleep bin/pollEndpoint
+SHARNESS = lib/sharness/sharness.sh
 
+find_go_files = $(shell find $(1) -name "*.go")
 
-# Add below the binaries that this project generates or needs.
-# For example:
-# BINS = bin/ipfs
-BINS = bin/ipget
+# User might want to override those on the command line
+GOFLAGS =
 
 all: aggregate
 
 clean: clean-test-results
 	@echo "*** $@ ***"
-	# Clean binaries below.
-	# For example:
-	# -rm -rf bin/ipfs
+	-rm -rf $(BINS)
 
 clean-test-results:
 	@echo "*** $@ ***"
@@ -34,37 +31,31 @@ $(T): clean-test-results deps
 
 aggregate: clean-test-results $(T)
 	@echo "*** $@ ***"
-	ls test-results/t*-*.sh.*.counts | $(AGGREGATE)
+	lib/test-aggregate-results.sh
 
-# Add below some needed dependencies.
-# For example:
-# deps: sharness $(BINS) curl
-deps: sharness $(BINS)
+deps: $(SHARNESS) $(BINS)
 
-sharness:
+$(SHARNESS): FORCE
 	@echo "*** checking $@ ***"
 	lib/install-sharness.sh
 
 bin/ipget:
 	go build -o bin/ipget github.com/ipfs/ipget
 
-# Add below other targets like:
-# - the targets needed to build binaries,
-# - targets using special compile flags,
-# - targets to check or install dependencies.
-#
-# For example:
-#
-# GOFLAGS =
-#
-# bin/%: FORCE
-# 	cd .. && make GOFLAGS=$(GOFLAGS) $@
-#
-# race:
-# 	make GOFLAGS=-race all
-#
-# curl:
-#	@which curl >/dev/null || (echo "Please install curl!" && false)
+bin/ipfs:
+	mkdir -p bin
+	go get github.com/ipfs/ipfs-update
+	ipfs-update fetch v0.4.0 --output=bin/ipfs
 
-.PHONY: all clean clean-test-results $(T) aggregate deps sharness FORCE
+bin/go-sleep:
+	go get -d github.com/chriscool/go-sleep
+	go build -o bin/go-sleep github.com/chriscool/go-sleep
 
+bin/pollEndpoint:
+	go get -d github.com/whyrusleeping/pollEndpoint
+	go build -o bin/pollEndpoint github.com/whyrusleeping/pollEndpoint
+
+race:
+	make GOFLAGS=-race all
+
+.PHONY: all clean $(T) aggregate FORCE
