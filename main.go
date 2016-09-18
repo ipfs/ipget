@@ -95,14 +95,14 @@ func main() {
 
 	// TODO(noffle): remove this once https://github.com/urfave/cli/issues/427 is
 	// fixed.
-	movePostfixOptions(os.Args)
+	args := movePostfixOptions(os.Args)
 
-	app.Run(os.Args)
+	app.Run(args)
 }
 
 // movePostfixOptions finds the Qmfoobar hash argument and moves it to the end
 // of the argument array.
-func movePostfixOptions(args []string) {
+func movePostfixOptions(args []string) []string {
 	var idx = 1
 	the_args := make([]string, 0)
 	for {
@@ -130,5 +130,5 @@ func movePostfixOptions(args []string) {
 	}
 
 	// append extracted arguments to the real args
-	args = append(args, the_args...)
+	return append(args, the_args...)
 }
