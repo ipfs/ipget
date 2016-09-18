@@ -110,7 +110,6 @@ func movePostfixOptions(args []string) {
 			break
 		}
 
-		fmt.Println("FOO 1", args[idx], idx)
 		if args[idx][0] == '-' {
 			if !strings.Contains(args[idx], "=") {
 				idx++
@@ -132,6 +131,4 @@ func movePostfixOptions(args []string) {
 
 	// append extracted arguments to the real args
 	args = append(args, the_args...)
-
-	fmt.Println(args)
 }
