@@ -33,7 +33,6 @@ path_check:
 
 deps: go_check gx_check path_check
 	${gx_bin} --verbose install --global
-	bin/setup_go-ipfs
 	go get
 
 install: deps
