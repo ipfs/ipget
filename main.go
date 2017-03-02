@@ -7,9 +7,9 @@ import (
 	"strings"
 	"syscall"
 
-	fallback "gx/ipfs/QmQri6AEp15WSRviCdKKX7hdELPrdBqFnWKsDcZ21je1xX/fallback-ipfs-shell"
+	path "gx/ipfs/QmQa2wf1sLFKkjHCVEbna8y5qhdMjL8vtTJSAc48vZGTer/go-ipfs/path"
 	cli "gx/ipfs/QmVcLF2CgjQb5BWmYFWsDfxDjbzBfcChfdHRedxeL3dV4K/cli"
-	path "gx/ipfs/QmXEaqe2JNoSRHrHiBGJoaCG9Zn8WVzNdANzUNhruSBa86/go-ipfs/path"
+	fallback "gx/ipfs/Qmdk8Ea9GkbwHr7UNKVYaLRwwHSt69xBXuSvRVyNWZ9sZE/fallback-ipfs-shell"
 )
 
 func main() {
