@@ -3,7 +3,7 @@ IPFS_MIN_GO_VERSION = 1.7
 IPFS_MIN_GX_VERSION = 0.6
 IPFS_MIN_GX_GO_VERSION = 1.1
 
-dist_root=/ipfs/QmNZL8wNsvAGdVYr8uGeUE9aGfHjFpHegAWywQFEdSaJbp
+dist_root=/ipfs/QmVQJ5mEGT38nYTfe3ZCCZPJhFDXTzBekUb8x3v8Pifugt
 gx_bin=bin/gx-v0.11.0
 gx-go_bin=bin/gx-go-v1.4.0
 
