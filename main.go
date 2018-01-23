@@ -9,7 +9,7 @@ import (
 
 	path "gx/ipfs/QmQa2wf1sLFKkjHCVEbna8y5qhdMjL8vtTJSAc48vZGTer/go-ipfs/path"
 	cli "gx/ipfs/QmVcLF2CgjQb5BWmYFWsDfxDjbzBfcChfdHRedxeL3dV4K/cli"
-	fallback "gx/ipfs/Qmdk8Ea9GkbwHr7UNKVYaLRwwHSt69xBXuSvRVyNWZ9sZE/fallback-ipfs-shell"
+	fallback "gx/ipfs/QmWFzKEP8iYC6zDWsvp15UKDjfu2qbSqtCoJewozp6HZ9j/fallback-ipfs-shell"
 )
 
 func main() {

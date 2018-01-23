@@ -7,15 +7,15 @@
   "gxDependencies": [
     {
       "author": "Stephen Whitmore <noffle@ipfs.io>",
-      "hash": "Qmdk8Ea9GkbwHr7UNKVYaLRwwHSt69xBXuSvRVyNWZ9sZE",
+      "hash": "QmWFzKEP8iYC6zDWsvp15UKDjfu2qbSqtCoJewozp6HZ9j",
       "name": "fallback-ipfs-shell",
-      "version": "3.2.4"
+      "version": "3.2.5"
     }
   ],
   "gxVersion": "0.7.0",
   "language": "go",
   "license": "",
   "name": "ipget",
-  "version": "0.2.5"
+  "version": "0.2.6"
 }
 
