@@ -7,9 +7,21 @@
   "gxDependencies": [
     {
       "author": "Stephen Whitmore <noffle@ipfs.io>",
-      "hash": "Qmdk8Ea9GkbwHr7UNKVYaLRwwHSt69xBXuSvRVyNWZ9sZE",
+      "hash": "QmaWDhoQaV6cDyy6NSKFgPaUAGRtb4SMiLpaDYEsxP7X8P",
       "name": "fallback-ipfs-shell",
-      "version": "3.2.4"
+      "version": "3.2.6"
+    },
+    {
+      "author": "why",
+      "hash": "QmT3rzed1ppXefourpmoZ7tyVQfsGPQZ1pHDngLmCvXxd3",
+      "name": "go-path",
+      "version": "1.1.16"
+    },
+    {
+      "author": "urfave",
+      "hash": "Qmc1AtgBdoUHP8oYSqU81NRYdzohmF45t5XNwVMvhCxsBA",
+      "name": "cli",
+      "version": "1.19.1"
     }
   ],
   "gxVersion": "0.7.0",
