@@ -40,12 +40,14 @@ $(SHARNESS): FORCE
 	lib/install-sharness.sh
 
 bin/ipget:
-	go build -o bin/ipget github.com/ipfs/ipget
+	mkdir -p bin
+	$(MAKE) -C .. build
+	cp ../ipget bin/ipget
 
 bin/ipfs:
 	mkdir -p bin
 	go get github.com/ipfs/ipfs-update
-	ipfs-update fetch v0.4.0 --output=bin/ipfs
+	ipfs-update fetch v0.4.18 --output=bin/ipfs
 
 bin/go-sleep:
 	go get -d github.com/chriscool/go-sleep
