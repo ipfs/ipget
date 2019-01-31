@@ -16,7 +16,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "ipget"
 	app.Usage = "Retrieve and save IPFS objects."
-	app.Version = "0.2.0"
+	app.Version = "0.3.2"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "output,o",
