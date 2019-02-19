@@ -2,12 +2,15 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"os/signal"
+	gopath "path"
+	"path/filepath"
 	"strings"
 	"syscall"
 
-	path "gx/ipfs/QmT3rzed1ppXefourpmoZ7tyVQfsGPQZ1pHDngLmCvXxd3/go-path"
+	ipath "gx/ipfs/QmT3rzed1ppXefourpmoZ7tyVQfsGPQZ1pHDngLmCvXxd3/go-path"
 	fallback "gx/ipfs/QmaWDhoQaV6cDyy6NSKFgPaUAGRtb4SMiLpaDYEsxP7X8P/fallback-ipfs-shell"
 	cli "gx/ipfs/Qmc1AtgBdoUHP8oYSqU81NRYdzohmF45t5XNwVMvhCxsBA/cli"
 )
@@ -35,22 +38,21 @@ func main() {
 			os.Exit(1)
 		}
 
-		outfile := c.String("output")
-		arg := c.Args().First()
+		outPath := c.String("output")
+		iPath, err := parsePath(c.Args().First())
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %s\n", err)
+			os.Exit(1)
+		}
 
 		// Use the final segment of the object's path if no path was given.
-		if outfile == "" {
-			ipfsPath, err := path.ParsePath(arg)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "ParsePath failure: %s\n", err)
-				os.Exit(1)
-			}
-			segments := ipfsPath.Segments()
-			outfile = segments[len(segments)-1]
+		if outPath == "" {
+			trimmed := strings.TrimRight(iPath.String(), "/")
+			_, outPath = filepath.Split(trimmed)
+			outPath = filepath.Clean(outPath)
 		}
 
 		var shell fallback.Shell
-		var err error
 
 		if c.String("node") == "fallback" {
 			shell, err = fallback.NewShell()
@@ -76,8 +78,8 @@ func main() {
 			return nil
 		}
 
-		if err := shell.Get(arg, outfile); err != nil {
-			os.Remove(outfile)
+		if err := shell.Get(iPath.String(), outPath); err != nil {
+			os.Remove(outPath)
 			fmt.Fprintf(os.Stderr, "ipget failed: %s\n", err)
 			os.Exit(2)
 		}
@@ -131,4 +133,24 @@ func movePostfixOptions(args []string) []string {
 
 	// append extracted arguments to the real args
 	return append(args, the_args...)
+}
+
+func parsePath(path string) (ipath.Path, error) {
+	ipfsPath, err := ipath.ParsePath(path)
+	if err == nil { // valid canonical path
+		return ipfsPath, nil
+	}
+	u, err := url.Parse(path)
+	if err != nil {
+		return "", fmt.Errorf("%q could not be parsed: %s", path, err)
+	}
+
+	switch proto := u.Scheme; proto {
+	case "ipfs", "ipld", "ipns":
+		return ipath.ParsePath(gopath.Join("/", proto, u.Host, u.Path))
+	case "http", "https":
+		return ipath.ParsePath(u.Path)
+	default:
+		return "", fmt.Errorf("%q is not recognized as an IPFS path")
+	}
 }
