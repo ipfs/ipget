@@ -33,6 +33,10 @@ func main() {
 			Usage: "specify ipfs node strategy ('local', 'spawn', or 'fallback')",
 			Value: "fallback",
 		},
+		cli.StringSliceFlag{
+			Name:  "peers,p",
+			Usage: "specify a set of IPFS peers to connect to",
+		},
 	}
 
 	app.Action = func(c *cli.Context) error {
@@ -74,6 +78,8 @@ func main() {
 		if err != nil {
 			return err
 		}
+
+		go connect(ctx, ipfs, c.StringSlice("peers"))
 
 		out, err := ipfs.Unixfs().Get(ctx, iPath)
 		if err != nil {
