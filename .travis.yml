@@ -2,6 +2,10 @@ os:
   - osx
   - linux
 
+env:
+  global:
+    - GO111MODULE=on
+
 language: go
 
 go:
