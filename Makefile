@@ -7,12 +7,6 @@ export PATH := bin:$(PATH)
 go_check:
 	@bin/check_go_version $(IPFS_MIN_GO_VERSION)
 
-bin/gx-v%:
-	@echo "installing gx $(@:bin/gx-%=%)"
-	@bin/dist_get ${dist_root} gx $@ $(@:bin/gx-%=%)
-	rm -f bin/gx
-	ln -s $(@:bin/%=%) bin/gx
-
 path_check:
 	@bin/check_go_path $(realpath $(shell pwd)) $(realpath $(GOPATH)/src/github.com/ipfs/ipget)
 
