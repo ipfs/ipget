@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 	"os/signal"
@@ -10,9 +12,10 @@ import (
 	"strings"
 	"syscall"
 
-	ipath "gx/ipfs/QmT3rzed1ppXefourpmoZ7tyVQfsGPQZ1pHDngLmCvXxd3/go-path"
-	fallback "gx/ipfs/QmaWDhoQaV6cDyy6NSKFgPaUAGRtb4SMiLpaDYEsxP7X8P/fallback-ipfs-shell"
-	cli "gx/ipfs/Qmc1AtgBdoUHP8oYSqU81NRYdzohmF45t5XNwVMvhCxsBA/cli"
+	files "github.com/ipfs/go-ipfs-files"
+	iface "github.com/ipfs/interface-go-ipfs-core"
+	ipath "github.com/ipfs/interface-go-ipfs-core/path"
+	cli "github.com/urfave/cli"
 )
 
 func main() {
@@ -30,19 +33,24 @@ func main() {
 			Usage: "specify ipfs node strategy ('local', 'spawn', or 'fallback')",
 			Value: "fallback",
 		},
+		cli.StringSliceFlag{
+			Name:  "peers,p",
+			Usage: "specify a set of IPFS peers to connect to",
+		},
 	}
 
 	app.Action = func(c *cli.Context) error {
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
 		if !c.Args().Present() {
-			fmt.Fprintf(os.Stderr, "usage: ipget <ipfs ref>\n")
-			os.Exit(1)
+			return fmt.Errorf("usage: ipget <ipfs ref>\n")
 		}
 
 		outPath := c.String("output")
 		iPath, err := parsePath(c.Args().First())
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %s\n", err)
-			os.Exit(1)
+			return err
 		}
 
 		// Use the final segment of the object's path if no path was given.
@@ -52,38 +60,35 @@ func main() {
 			outPath = filepath.Clean(outPath)
 		}
 
-		var shell fallback.Shell
-
-		if c.String("node") == "fallback" {
-			shell, err = fallback.NewShell()
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "error: %s\n", err)
-				os.Exit(1)
+		var ipfs iface.CoreAPI
+		switch c.String("node") {
+		case "fallback":
+			ipfs, err = http(ctx)
+			if err == nil {
+				break
 			}
-		} else if c.String("node") == "spawn" {
-			shell, err = fallback.NewEmbeddedShell()
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "error: %s\n", err)
-				os.Exit(1)
-			}
-		} else if c.String("node") == "local" {
-			shell, err = fallback.NewApiShell()
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "error: %s\n", err)
-				os.Exit(1)
-			}
-		} else {
-			fmt.Fprintf(os.Stderr, "error: no such 'node' strategy, '%s'\n", c.String("node"))
-			os.Exit(1)
-			return nil
+			fallthrough
+		case "spawn":
+			ipfs, err = spawn(ctx)
+		case "local":
+			ipfs, err = http(ctx)
+		default:
+			return fmt.Errorf("no such 'node' strategy, %q", c.String("node"))
+		}
+		if err != nil {
+			return err
 		}
 
-		if err := shell.Get(iPath.String(), outPath); err != nil {
-			os.Remove(outPath)
-			fmt.Fprintf(os.Stderr, "ipget failed: %s\n", err)
-			os.Exit(2)
-		}
+		go connect(ctx, ipfs, c.StringSlice("peers"))
 
+		out, err := ipfs.Unixfs().Get(ctx, iPath)
+		if err != nil {
+			return cli.NewExitError(err, 2)
+		}
+		err = files.WriteTo(out, outPath)
+		if err != nil {
+			return cli.NewExitError(err, 2)
+		}
 		return nil
 	}
 
@@ -99,7 +104,10 @@ func main() {
 	// fixed.
 	args := movePostfixOptions(os.Args)
 
-	app.Run(args)
+	err := app.Run(args)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 // movePostfixOptions finds the Qmfoobar hash argument and moves it to the end
@@ -136,21 +144,23 @@ func movePostfixOptions(args []string) []string {
 }
 
 func parsePath(path string) (ipath.Path, error) {
-	ipfsPath, err := ipath.ParsePath(path)
-	if err == nil { // valid canonical path
+	ipfsPath := ipath.New(path)
+	if ipfsPath.IsValid() == nil {
 		return ipfsPath, nil
 	}
+
 	u, err := url.Parse(path)
 	if err != nil {
-		return "", fmt.Errorf("%q could not be parsed: %s", path, err)
+		return nil, fmt.Errorf("%q could not be parsed: %s", path, err)
 	}
 
 	switch proto := u.Scheme; proto {
 	case "ipfs", "ipld", "ipns":
-		return ipath.ParsePath(gopath.Join("/", proto, u.Host, u.Path))
+		ipfsPath = ipath.New(gopath.Join("/", proto, u.Host, u.Path))
 	case "http", "https":
-		return ipath.ParsePath(u.Path)
+		ipfsPath = ipath.New(u.Path)
 	default:
-		return "", fmt.Errorf("%q is not recognized as an IPFS path")
+		return nil, fmt.Errorf("%q is not recognized as an IPFS path", path)
 	}
+	return ipfsPath, ipfsPath.IsValid()
 }

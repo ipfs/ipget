@@ -1,15 +1,8 @@
 # Minimum version numbers for software required to build IPFS
 IPFS_MIN_GO_VERSION = 1.11
-IPFS_MIN_GX_VERSION = 0.14
-IPFS_MIN_GX_GO_VERSION = 1.9
-
-dist_root=/ipfs/QmWrXF8Yj4bYymNnE8onjAQc6NJ5XtTa4N2GKB2Waz2qSQ
-gx_bin=bin/gx-v0.14.0
-gx-go_bin=bin/gx-go-v1.9.0
 
 # use things in our bin before any other system binaries
 export PATH := bin:$(PATH)
-export IPFS_API ?= v04x.ipfs.io
 
 go_check:
 	@bin/check_go_version $(IPFS_MIN_GO_VERSION)
@@ -20,19 +13,11 @@ bin/gx-v%:
 	rm -f bin/gx
 	ln -s $(@:bin/%=%) bin/gx
 
-bin/gx-go-v%:
-	@echo "installing gx-go $(@:bin/gx-go-%=%)"
-	@bin/dist_get ${dist_root} gx-go $@ $(@:bin/gx-go-%=%)
-	rm -f bin/gx-go
-	ln -s $(@:bin/%=%) bin/gx-go
-
-gx_check: ${gx_bin} ${gx-go_bin}
-
 path_check:
 	@bin/check_go_path $(realpath $(shell pwd)) $(realpath $(GOPATH)/src/github.com/ipfs/ipget)
 
-deps: go_check gx_check path_check
-	${gx_bin} --verbose install --global
+deps: go_check path_check
+	go mod download
 
 install: deps
 	go install
@@ -46,8 +31,7 @@ clean:
 uninstall:
 	go clean github.com/ipfs/ipget
 
-PHONY += help gx_check
-PHONY += go_check deps install build clean
+PHONY += help go_check deps install build clean
 
 ##############################################################
 # A semi-helpful help message
@@ -55,8 +39,7 @@ PHONY += go_check deps install build clean
 help:
 	@echo 'DEPENDENCY TARGETS:'
 	@echo ''
-	@echo '  gx_check        - Installs or upgrades gx and gx-go'
-	@echo '  deps            - Download dependencies using gx'
+	@echo '  deps            - Download dependencies'
 	@echo ''
 	@echo 'BUILD TARGETS:'
 	@echo ''

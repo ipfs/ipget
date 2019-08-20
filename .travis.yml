@@ -2,10 +2,14 @@ os:
   - osx
   - linux
 
+env:
+  global:
+    - GO111MODULE=on
+
 language: go
 
 go:
-    - 1.11
+    - 1.12
 
 script:
   - make build
