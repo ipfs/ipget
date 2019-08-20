@@ -85,7 +85,11 @@ func main() {
 		if err != nil {
 			return cli.NewExitError(err, 2)
 		}
-		return cli.NewExitError(files.WriteTo(out, outPath), 2)
+		err = files.WriteTo(out, outPath)
+		if err != nil {
+			return cli.NewExitError(err, 2)
+		}
+		return nil
 	}
 
 	// Catch interrupt signal
