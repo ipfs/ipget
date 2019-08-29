@@ -75,6 +75,12 @@ func tmpNode(ctx context.Context) (iface.CoreAPI, error) {
 		return nil, err
 	}
 
+	// Set some ipget specific defaults.
+	cfg.Experimental.ShardingEnabled = true
+	cfg.Experimental.QUIC = true
+	cfg.Routing.Type = "dhtclient"
+	cfg.Reprovider.Interval = "0"
+
 	err = fsrepo.Init(dir, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to init ephemeral node: %s", err)
