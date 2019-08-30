@@ -24,18 +24,8 @@ func spawn(ctx context.Context) (iface.CoreAPI, error) {
 		return nil, err
 	}
 
-	// Load plugins. This will skip the repo if not available.
-	plugins, err := loader.NewPluginLoader(filepath.Join(defaultPath, "plugins"))
-	if err != nil {
-		return nil, fmt.Errorf("error loading plugins: %s", err)
-	}
-
-	if err := plugins.Initialize(); err != nil {
-		return nil, fmt.Errorf("error initializing plugins: %s", err)
-	}
-
-	if err := plugins.Inject(); err != nil {
-		return nil, fmt.Errorf("error initializing plugins: %s", err)
+	if err := setupPlugins(defaultPath); err != nil {
+		return nil, err
 	}
 
 	ipfs, err := open(ctx, defaultPath)
@@ -44,6 +34,24 @@ func spawn(ctx context.Context) (iface.CoreAPI, error) {
 	}
 
 	return tmpNode(ctx, nil)
+}
+
+func setupPlugins(path string) error {
+	// Load plugins. This will skip the repo if not available.
+	plugins, err := loader.NewPluginLoader(filepath.Join(path, "plugins"))
+	if err != nil {
+		return fmt.Errorf("error loading plugins: %s", err)
+	}
+
+	if err := plugins.Initialize(); err != nil {
+		return fmt.Errorf("error initializing plugins: %s", err)
+	}
+
+	if err := plugins.Inject(); err != nil {
+		return fmt.Errorf("error initializing plugins: %s", err)
+	}
+
+	return nil
 }
 
 func open(ctx context.Context, repoPath string) (iface.CoreAPI, error) {
@@ -73,18 +81,8 @@ func temp(ctx context.Context, cfgopts []CfgOpt) (iface.CoreAPI, error) {
 		return nil, err
 	}
 
-	// Load plugins. This will skip the repo if not available.
-	plugins, err := loader.NewPluginLoader(filepath.Join(defaultPath, "plugins"))
-	if err != nil {
-		return nil, fmt.Errorf("error loading plugins: %s", err)
-	}
-
-	if err := plugins.Initialize(); err != nil {
-		return nil, fmt.Errorf("error initializing plugins: %s", err)
-	}
-
-	if err := plugins.Inject(); err != nil {
-		return nil, fmt.Errorf("error initializing plugins: %s", err)
+	if err := setupPlugins(defaultPath); err != nil {
+		return nil, err
 	}
 
 	return tmpNode(ctx, cfgopts)
