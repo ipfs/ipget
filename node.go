@@ -15,6 +15,8 @@ import (
 	"github.com/ipfs/interface-go-ipfs-core"
 )
 
+type CfgOpt func(*config.Config)
+
 func spawn(ctx context.Context) (iface.CoreAPI, error) {
 	defaultPath, err := config.PathRoot()
 	if err != nil {
@@ -41,7 +43,7 @@ func spawn(ctx context.Context) (iface.CoreAPI, error) {
 		return ipfs, nil
 	}
 
-	return tmpNode(ctx)
+	return tmpNode(ctx, nil)
 }
 
 func open(ctx context.Context, repoPath string) (iface.CoreAPI, error) {
@@ -64,7 +66,7 @@ func open(ctx context.Context, repoPath string) (iface.CoreAPI, error) {
 	return coreapi.NewCoreAPI(node)
 }
 
-func temp(ctx context.Context) (iface.CoreAPI, error) {
+func temp(ctx context.Context, cfgopts []CfgOpt) (iface.CoreAPI, error) {
 	defaultPath, err := config.PathRoot()
 	if err != nil {
 		// shouldn't be possible
@@ -85,10 +87,10 @@ func temp(ctx context.Context) (iface.CoreAPI, error) {
 		return nil, fmt.Errorf("error initializing plugins: %s", err)
 	}
 
-	return tmpNode(ctx)
+	return tmpNode(ctx, cfgopts)
 }
 
-func tmpNode(ctx context.Context) (iface.CoreAPI, error) {
+func tmpNode(ctx context.Context, cfgopts []CfgOpt) (iface.CoreAPI, error) {
 	dir, err := ioutil.TempDir("", "ipfs-shell")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get temp dir: %s", err)
@@ -97,6 +99,10 @@ func tmpNode(ctx context.Context) (iface.CoreAPI, error) {
 	cfg, err := config.Init(ioutil.Discard, 2048)
 	if err != nil {
 		return nil, err
+	}
+
+	for _, opt := range cfgopts {
+		opt(cfg)
 	}
 
 	err = fsrepo.Init(dir, cfg)

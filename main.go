@@ -13,6 +13,7 @@ import (
 	"strings"
 	"syscall"
 
+	config "github.com/ipfs/go-ipfs-config"
 	files "github.com/ipfs/go-ipfs-files"
 	iface "github.com/ipfs/interface-go-ipfs-core"
 	ipath "github.com/ipfs/interface-go-ipfs-core/path"
@@ -79,7 +80,18 @@ func main() {
 		case "local":
 			ipfs, err = http(ctx)
 		case "temp":
-			ipfs, err = temp(ctx)
+			opts := []CfgOpt{
+				func(cfg *config.Config) {
+					cfg.Routing.Type = "dhtclient"
+				},
+				func(cfg *config.Config) {
+					cfg.Datastore.Spec = map[string]interface{}{
+						"type": "badgerds",
+						"path": "badger",
+					}
+				},
+			}
+			ipfs, err = temp(ctx, opts)
 		default:
 			return fmt.Errorf("no such 'node' strategy, %q", c.String("node"))
 		}
