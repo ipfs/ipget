@@ -12,5 +12,4 @@ require (
 	github.com/libp2p/go-libp2p-peerstore v0.0.6
 	github.com/multiformats/go-multiaddr v0.0.4
 	github.com/urfave/cli v1.21.0
-	google.golang.org/appengine v1.4.0 // indirect
 )

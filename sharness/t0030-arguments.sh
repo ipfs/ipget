@@ -2,7 +2,7 @@
 
 test_description="test the ipget argument parser"
 
-. ./lib/sharness/sharness.sh
+. ./lib/test-lib.sh
 
 test_expect_success "retrieve a known popular single file with a (HTTP) gateway URL" "
     ipget http://ipfs.io/ipfs/QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat.gif &&

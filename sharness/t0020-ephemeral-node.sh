@@ -2,7 +2,7 @@
 
 test_description="test the ipget command by spawning a shell"
 
-. ./lib/sharness/sharness.sh
+. ./lib/test-lib.sh
 
 test_expect_success "retrieve a known popular single file" "
     ipget --node=spawn QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat.gif &&
