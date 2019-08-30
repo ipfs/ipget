@@ -80,18 +80,7 @@ func main() {
 		case "local":
 			ipfs, err = http(ctx)
 		case "temp":
-			opts := []CfgOpt{
-				func(cfg *config.Config) {
-					cfg.Routing.Type = "dhtclient"
-				},
-				func(cfg *config.Config) {
-					cfg.Datastore.Spec = map[string]interface{}{
-						"type": "badgerds",
-						"path": "badger",
-					}
-				},
-			}
-			ipfs, err = temp(ctx, opts)
+			ipfs, err = temp(ctx)
 		default:
 			return fmt.Errorf("no such 'node' strategy, %q", c.String("node"))
 		}
