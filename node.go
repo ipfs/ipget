@@ -64,6 +64,30 @@ func open(ctx context.Context, repoPath string) (iface.CoreAPI, error) {
 	return coreapi.NewCoreAPI(node)
 }
 
+func temp(ctx context.Context) (iface.CoreAPI, error) {
+	defaultPath, err := config.PathRoot()
+	if err != nil {
+		// shouldn't be possible
+		return nil, err
+	}
+
+	// Load plugins. This will skip the repo if not available.
+	plugins, err := loader.NewPluginLoader(filepath.Join(defaultPath, "plugins"))
+	if err != nil {
+		return nil, fmt.Errorf("error loading plugins: %s", err)
+	}
+
+	if err := plugins.Initialize(); err != nil {
+		return nil, fmt.Errorf("error initializing plugins: %s", err)
+	}
+
+	if err := plugins.Inject(); err != nil {
+		return nil, fmt.Errorf("error initializing plugins: %s", err)
+	}
+
+	return tmpNode(ctx)
+}
+
 func tmpNode(ctx context.Context) (iface.CoreAPI, error) {
 	dir, err := ioutil.TempDir("", "ipfs-shell")
 	if err != nil {

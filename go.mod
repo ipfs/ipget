@@ -13,4 +13,5 @@ require (
 	github.com/multiformats/go-multiaddr v0.0.4
 	github.com/urfave/cli v1.21.0
 	google.golang.org/appengine v1.4.0 // indirect
+	gopkg.in/cheggaaa/pb.v1 v1.0.28
 )
