@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net/url"
 	"os"
@@ -16,6 +17,7 @@ import (
 	iface "github.com/ipfs/interface-go-ipfs-core"
 	ipath "github.com/ipfs/interface-go-ipfs-core/path"
 	cli "github.com/urfave/cli"
+	pb "gopkg.in/cheggaaa/pb.v1"
 )
 
 func main() {
@@ -36,6 +38,10 @@ func main() {
 		cli.StringSliceFlag{
 			Name:  "peers,p",
 			Usage: "specify a set of IPFS peers to connect to",
+		},
+		cli.BoolFlag{
+			Name:  "progress",
+			Usage: "show a progress bar",
 		},
 	}
 
@@ -72,6 +78,8 @@ func main() {
 			ipfs, err = spawn(ctx)
 		case "local":
 			ipfs, err = http(ctx)
+		case "temp":
+			ipfs, err = temp(ctx)
 		default:
 			return fmt.Errorf("no such 'node' strategy, %q", c.String("node"))
 		}
@@ -85,7 +93,7 @@ func main() {
 		if err != nil {
 			return cli.NewExitError(err, 2)
 		}
-		err = files.WriteTo(out, outPath)
+		err = WriteTo(out, outPath, c.Bool("progress"))
 		if err != nil {
 			return cli.NewExitError(err, 2)
 		}
@@ -163,4 +171,58 @@ func parsePath(path string) (ipath.Path, error) {
 		return nil, fmt.Errorf("%q is not recognized as an IPFS path", path)
 	}
 	return ipfsPath, ipfsPath.IsValid()
+}
+
+// WriteTo writes the given node to the local filesystem at fpath.
+func WriteTo(nd files.Node, fpath string, progress bool) error {
+	s, err := nd.Size()
+	if err != nil {
+		return err
+	}
+
+	var bar *pb.ProgressBar
+	if progress {
+		bar = pb.New64(s).Start()
+	}
+
+	return writeToRec(nd, fpath, bar)
+}
+
+func writeToRec(nd files.Node, fpath string, bar *pb.ProgressBar) error {
+	switch nd := nd.(type) {
+	case *files.Symlink:
+		return os.Symlink(nd.Target, fpath)
+	case files.File:
+		f, err := os.Create(fpath)
+		defer f.Close()
+		if err != nil {
+			return err
+		}
+
+		var r io.Reader = nd
+		if bar != nil {
+			r = bar.NewProxyReader(r)
+		}
+		_, err = io.Copy(f, r)
+		if err != nil {
+			return err
+		}
+		return nil
+	case files.Directory:
+		err := os.Mkdir(fpath, 0777)
+		if err != nil {
+			return err
+		}
+
+		entries := nd.Entries()
+		for entries.Next() {
+			child := filepath.Join(fpath, entries.Name())
+			if err := writeToRec(entries.Node(), child, bar); err != nil {
+				return err
+			}
+		}
+		return entries.Err()
+	default:
+		return fmt.Errorf("file type %T at %q is not supported", nd, fpath)
+	}
 }

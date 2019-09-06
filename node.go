@@ -15,6 +15,8 @@ import (
 	"github.com/ipfs/interface-go-ipfs-core"
 )
 
+type CfgOpt func(*config.Config)
+
 func spawn(ctx context.Context) (iface.CoreAPI, error) {
 	defaultPath, err := config.PathRoot()
 	if err != nil {
@@ -22,18 +24,8 @@ func spawn(ctx context.Context) (iface.CoreAPI, error) {
 		return nil, err
 	}
 
-	// Load plugins. This will skip the repo if not available.
-	plugins, err := loader.NewPluginLoader(filepath.Join(defaultPath, "plugins"))
-	if err != nil {
-		return nil, fmt.Errorf("error loading plugins: %s", err)
-	}
-
-	if err := plugins.Initialize(); err != nil {
-		return nil, fmt.Errorf("error initializing plugins: %s", err)
-	}
-
-	if err := plugins.Inject(); err != nil {
-		return nil, fmt.Errorf("error initializing plugins: %s", err)
+	if err := setupPlugins(defaultPath); err != nil {
+		return nil, err
 	}
 
 	ipfs, err := open(ctx, defaultPath)
@@ -42,6 +34,24 @@ func spawn(ctx context.Context) (iface.CoreAPI, error) {
 	}
 
 	return tmpNode(ctx)
+}
+
+func setupPlugins(path string) error {
+	// Load plugins. This will skip the repo if not available.
+	plugins, err := loader.NewPluginLoader(filepath.Join(path, "plugins"))
+	if err != nil {
+		return fmt.Errorf("error loading plugins: %s", err)
+	}
+
+	if err := plugins.Initialize(); err != nil {
+		return fmt.Errorf("error initializing plugins: %s", err)
+	}
+
+	if err := plugins.Inject(); err != nil {
+		return fmt.Errorf("error initializing plugins: %s", err)
+	}
+
+	return nil
 }
 
 func open(ctx context.Context, repoPath string) (iface.CoreAPI, error) {
@@ -64,6 +74,20 @@ func open(ctx context.Context, repoPath string) (iface.CoreAPI, error) {
 	return coreapi.NewCoreAPI(node)
 }
 
+func temp(ctx context.Context) (iface.CoreAPI, error) {
+	defaultPath, err := config.PathRoot()
+	if err != nil {
+		// shouldn't be possible
+		return nil, err
+	}
+
+	if err := setupPlugins(defaultPath); err != nil {
+		return nil, err
+	}
+
+	return tmpNode(ctx)
+}
+
 func tmpNode(ctx context.Context) (iface.CoreAPI, error) {
 	dir, err := ioutil.TempDir("", "ipfs-shell")
 	if err != nil {
@@ -73,6 +97,14 @@ func tmpNode(ctx context.Context) (iface.CoreAPI, error) {
 	cfg, err := config.Init(ioutil.Discard, 2048)
 	if err != nil {
 		return nil, err
+	}
+
+	// configure the temporary node
+	cfg.Routing.Type = "dhtclient"
+	cfg.Experimental.QUIC = true
+	cfg.Datastore.Spec = map[string]interface{}{
+		"type": "badgerds",
+		"path": "badger",
 	}
 
 	err = fsrepo.Init(dir, cfg)
