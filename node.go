@@ -102,10 +102,6 @@ func tmpNode(ctx context.Context) (iface.CoreAPI, error) {
 	// configure the temporary node
 	cfg.Routing.Type = "dhtclient"
 	cfg.Experimental.QUIC = true
-	cfg.Datastore.Spec = map[string]interface{}{
-		"type": "badgerds",
-		"path": "badger",
-	}
 
 	err = fsrepo.Init(dir, cfg)
 	if err != nil {
