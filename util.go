@@ -35,10 +35,12 @@ func connect(ctx context.Context, ipfs iface.CoreAPI, peers []string) error {
 	for _, pi := range pinfos {
 		go func(pi *peerstore.PeerInfo) {
 			defer wg.Done()
+			log.Printf("attempting to connect to peer: %q\n", pi)
 			err := ipfs.Swarm().Connect(ctx, *pi)
 			if err != nil {
 				log.Printf("failed to connect to %s: %s", pi.ID, err)
 			}
+			log.Printf("successfully connected to %s\n", pi.ID)
 		}(pi)
 	}
 	wg.Wait()
