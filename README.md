@@ -45,10 +45,11 @@ or with an `/ipfs` prefix:
 ```
 $ ipget -o nyan.gif /ipfs/QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat.gif
 ```
-or even IPNS addresses:
+or even IPNS addresses (note this is an IPNS address example and does not work):
 ```
 $ ipget /ipns/QmQG1kwx91YQsGcsa9Z1p6BPJ3amdiSLLmsmAoEMwbX61b/files/cat.gif
 ```
+
 
 
 ## Usage
