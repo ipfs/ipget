@@ -13,6 +13,7 @@ import (
 	"github.com/ipfs/go-ipfs/plugin/loader"
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
 	"github.com/ipfs/interface-go-ipfs-core"
+	"github.com/ipfs/interface-go-ipfs-core/options"
 )
 
 type CfgOpt func(*config.Config)
@@ -94,14 +95,19 @@ func tmpNode(ctx context.Context) (iface.CoreAPI, error) {
 		return nil, fmt.Errorf("failed to get temp dir: %s", err)
 	}
 
-	cfg, err := config.Init(ioutil.Discard, 2048)
+	identity, err := config.CreateIdentity(ioutil.Discard, []options.KeyGenerateOption{
+		options.Key.Type(options.Ed25519Key),
+	})
+	if err != nil {
+		return nil, err
+	}
+	cfg, err := config.InitWithIdentity(identity)
 	if err != nil {
 		return nil, err
 	}
 
 	// configure the temporary node
 	cfg.Routing.Type = "dhtclient"
-	cfg.Experimental.QUIC = true
 
 	err = fsrepo.Init(dir, cfg)
 	if err != nil {
