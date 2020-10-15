@@ -16,7 +16,7 @@ import (
 	files "github.com/ipfs/go-ipfs-files"
 	iface "github.com/ipfs/interface-go-ipfs-core"
 	ipath "github.com/ipfs/interface-go-ipfs-core/path"
-	cli "github.com/urfave/cli"
+	cli "github.com/urfave/cli/v2"
 	pb "gopkg.in/cheggaaa/pb.v1"
 )
 
@@ -26,20 +26,23 @@ func main() {
 	app.Usage = "Retrieve and save IPFS objects."
 	app.Version = "0.6.1"
 	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:  "output,o",
-			Usage: "specify output location",
+		&cli.StringFlag{
+			Name:    "output",
+			Aliases: []string{"o"},
+			Usage:   "specify output location",
 		},
-		cli.StringFlag{
-			Name:  "node,n",
-			Usage: "specify ipfs node strategy ('local', 'spawn', `temp` or 'fallback')",
-			Value: "fallback",
+		&cli.StringFlag{
+			Name:    "node",
+			Aliases: []string{"n"},
+			Usage:   "specify ipfs node strategy ('local', 'spawn', `temp` or 'fallback')",
+			Value:   "fallback",
 		},
-		cli.StringSliceFlag{
-			Name:  "peers,p",
-			Usage: "specify a set of IPFS peers to connect to",
+		&cli.StringSliceFlag{
+			Name:    "peers",
+			Aliases: []string{"p"},
+			Usage:   "specify a set of IPFS peers to connect to",
 		},
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:  "progress",
 			Usage: "show a progress bar",
 		},
@@ -91,11 +94,11 @@ func main() {
 
 		out, err := ipfs.Unixfs().Get(ctx, iPath)
 		if err != nil {
-			return cli.NewExitError(err, 2)
+			return cli.Exit(err, 2)
 		}
 		err = WriteTo(out, outPath, c.Bool("progress"))
 		if err != nil {
-			return cli.NewExitError(err, 2)
+			return cli.Exit(err, 2)
 		}
 		return nil
 	}
@@ -108,8 +111,7 @@ func main() {
 		os.Exit(1)
 	}()
 
-	// TODO(noffle): remove this once https://github.com/urfave/cli/issues/427 is
-	// fixed.
+	// cli library requires flags before arguments
 	args := movePostfixOptions(os.Args)
 
 	err := app.Run(args)
@@ -118,37 +120,31 @@ func main() {
 	}
 }
 
-// movePostfixOptions finds the Qmfoobar hash argument and moves it to the end
-// of the argument array.
+// movePostfixOptions moves non-flag arguments to end of argument list.
 func movePostfixOptions(args []string) []string {
-	var idx = 1
-	the_args := make([]string, 0)
-	for {
-		if idx >= len(args) {
-			break
-		}
-
+	var endArgs []string
+	for idx := 1; idx < len(args); idx++ {
 		if args[idx][0] == '-' {
 			if !strings.Contains(args[idx], "=") {
 				idx++
 			}
-		} else {
-			// add to args accumulator
-			the_args = append(the_args, args[idx])
-
-			// remove from real args list
-			new_args := make([]string, 0)
-			new_args = append(new_args, args[:idx]...)
-			new_args = append(new_args, args[idx+1:]...)
-			args = new_args
-			idx--
+			continue
 		}
-
-		idx++
+		if endArgs == nil {
+			// on first write, make copy of args
+			newArgs := make([]string, len(args))
+			copy(newArgs, args)
+			args = newArgs
+		}
+		// add to args accumulator
+		endArgs = append(endArgs, args[idx])
+		// remove from real args list
+		args = args[:idx+copy(args[idx:], args[idx+1:])]
+		idx--
 	}
 
 	// append extracted arguments to the real args
-	return append(args, the_args...)
+	return append(args, endArgs...)
 }
 
 func parsePath(path string) (ipath.Path, error) {
