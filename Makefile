@@ -7,10 +7,7 @@ export PATH := bin:$(PATH)
 go_check:
 	@bin/check_go_version $(IPFS_MIN_GO_VERSION)
 
-path_check:
-	@bin/check_go_path $(realpath $(shell pwd)) $(realpath $(GOPATH)/src/github.com/ipfs/ipget)
-
-deps: go_check path_check
+deps: go_check
 	go mod download
 
 install: deps

@@ -21,11 +21,6 @@ Download a binary for your platform from [IPFS Distributions](https://dist.ipfs.
 
 ### Install From Source
 
-`ipget` doesn't use the vanilla Go package management system. It instead uses
-the [gx](https://github.com/whyrusleeping/gx) (and
-[gx-go](https://github.com/whyrusleeping/gx-go)) workflow. This means a slightly
-different set of steps to install:
-
 ```
 $ go get -d github.com/ipfs/ipget
 
@@ -50,8 +45,6 @@ or even IPNS addresses (note this is an IPNS address example and does not work):
 $ ipget /ipns/QmQG1kwx91YQsGcsa9Z1p6BPJ3amdiSLLmsmAoEMwbX61b/files/cat.gif
 ```
 
-
-
 ## Usage
 
 ```
@@ -67,6 +60,9 @@ VERSION:
 COMMANDS:
 GLOBAL OPTIONS:
    --output value, -o value  specify output location
+   --node temp, -n temp      specify ipfs node strategy ('local', 'spawn', temp or 'fallback') (default: "fallback")
+   --peers value, -p value   specify a set of IPFS peers to connect to
+   --progress                show a progress bar
    --help, -h                show help
    --version, -v             print the version
 ```
