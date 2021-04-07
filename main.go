@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"net/url"
 	"os"
 	"os/signal"
@@ -48,10 +47,11 @@ func main() {
 		},
 	}
 
-	app.Action = func(c *cli.Context) error {
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	sigExitCoder := make(chan cli.ExitCoder, 1)
 
+	app.Action = func(c *cli.Context) error {
 		if !c.Args().Present() {
 			return fmt.Errorf("usage: ipget <ipfs ref>\n")
 		}
@@ -94,10 +94,16 @@ func main() {
 
 		out, err := ipfs.Unixfs().Get(ctx, iPath)
 		if err != nil {
+			if err == context.Canceled {
+				return <-sigExitCoder
+			}
 			return cli.Exit(err, 2)
 		}
 		err = WriteTo(out, outPath, c.Bool("progress"))
 		if err != nil {
+			if err == context.Canceled {
+				return <-sigExitCoder
+			}
 			return cli.Exit(err, 2)
 		}
 		return nil
@@ -107,8 +113,9 @@ func main() {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
-		<-sigs
-		os.Exit(1)
+		sig := <-sigs
+		sigExitCoder <- cli.Exit("", 128+int(sig.(syscall.Signal)))
+		cancel()
 	}()
 
 	// cli library requires flags before arguments
@@ -116,7 +123,8 @@ func main() {
 
 	err := app.Run(args)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 }
 
