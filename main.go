@@ -33,7 +33,7 @@ func main() {
 		&cli.StringFlag{
 			Name:    "node",
 			Aliases: []string{"n"},
-			Usage:   "specify ipfs node strategy ('local', 'spawn', `temp` or 'fallback')",
+			Usage:   "specify ipfs node strategy (\"local\", \"spawn\", \"temp\" or \"fallback\")",
 			Value:   "fallback",
 		},
 		&cli.StringSliceFlag{
