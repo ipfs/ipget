@@ -15,82 +15,174 @@ PATH=$(pwd)/bin:${PATH}
 # it's too late to pass in --verbose, and --verbose is harder
 # to pass through in some cases.
 test "$TEST_VERBOSE" = 1 && verbose=t
+test "$TEST_IMMEDIATE" = 1 && immediate=t
 
-# assert the `ipfs` we're using is the right one.
-if test `which ipfs` != $(pwd)/bin/ipfs; then
-	echo >&2 "Cannot find the tests' local ipfs tool."
-	echo >&2 "Please check test and ipfs tool installation."
-	exit 1
-fi
 
 SHARNESS_LIB="lib/sharness/sharness.sh"
 
 . "$SHARNESS_LIB" || {
-	echo >&2 "Cannot source: $SHARNESS_LIB"
-	echo >&2 "Please check Sharness installation."
-	exit 1
+  echo >&2 "Cannot source: $SHARNESS_LIB"
+  echo >&2 "Please check Sharness installation."
+  exit 1
 }
 
 # Please put go-ipfs specific shell functions below
 
+###
+# BEGIN Check for pre-existing daemon being stuck
+###
+wait_prev_cleanup_tick_secs=1
+wait_prev_cleanup_max_secs=5
+cur_test_pwd="$(pwd)"
+
+while true ; do
+  echo -n > stuck_cwd_list
+
+  lsof -c ipfs -Ffn 2>/dev/null | grep -A1 '^fcwd$' | grep '^n' | cut -b 2- | while read -r pwd_of_stuck ; do
+    case "$pwd_of_stuck" in
+      "$cur_test_pwd"*)
+        echo "$pwd_of_stuck" >> stuck_cwd_list
+        ;;
+      *)
+        ;;
+    esac
+  done
+
+  test -s stuck_cwd_list || break
+
+  test "$wait_prev_cleanup_max_secs" -le 0 && break
+
+  echo "Daemons still running, waiting for ${wait_prev_cleanup_max_secs}s"
+  sleep $wait_prev_cleanup_tick_secs
+
+  wait_prev_cleanup_max_secs="$(( $wait_prev_cleanup_max_secs - $wait_prev_cleanup_tick_secs ))"
+done
+
+if test -s stuck_cwd_list ; then
+  test_expect_success "ipfs daemon (s)seems to be running with CWDs of
+$(cat stuck_cwd_list)
+Almost certainly a leftover from a prior test, ABORTING" 'false'
+
+  test_done
+fi
+###
+# END Check for pre-existing daemon being stuck
+###
+
+# Make sure the ipfs path is set, also set in test_init_ipfs but that
+# is not always used.
+export IPFS_PATH="$(pwd)/.ipfs"
+# Ask programs to please not print ANSI codes
+export TERM=dumb
+
+TEST_OS="$(uname -s | tr '[a-z]' '[A-Z]')"
+
 # grab + output options
 test "$TEST_NO_FUSE" != 1 && test_set_prereq FUSE
 test "$TEST_EXPENSIVE" = 1 && test_set_prereq EXPENSIVE
+test "$TEST_NO_DOCKER" != 1 && type docker >/dev/null 2>&1 && groups | egrep "\bdocker\b" && test_set_prereq DOCKER
+test "$TEST_NO_PLUGIN" != 1 && test "$TEST_OS" = "LINUX" && test_set_prereq PLUGIN
+
+# this may not be available, skip a few dependent tests
+type socat >/dev/null 2>&1 && test_set_prereq SOCAT
+
+
+# Set a prereq as error messages are often different on Windows/Cygwin
+expr "$TEST_OS" : "CYGWIN_NT" >/dev/null || test_set_prereq STD_ERR_MSG
 
 if test "$TEST_VERBOSE" = 1; then
-	echo '# TEST_VERBOSE='"$TEST_VERBOSE"
-	echo '# TEST_NO_FUSE='"$TEST_NO_FUSE"
-	echo '# TEST_EXPENSIVE='"$TEST_EXPENSIVE"
+  echo '# TEST_VERBOSE='"$TEST_VERBOSE"
+  echo '# TEST_NO_FUSE='"$TEST_NO_FUSE"
+  echo '# TEST_NO_PLUGIN='"$TEST_NO_PLUGIN"
+  echo '# TEST_EXPENSIVE='"$TEST_EXPENSIVE"
+  echo '# TEST_OS='"$TEST_OS"
 fi
 
-test_cmp_repeat_10_sec() {
-	for i in $(test_seq 1 100)
-	do
-		test_cmp "$1" "$2" >/dev/null && return
-		go-sleep 100ms
-	done
-	test_cmp "$1" "$2"
+# Echo the args, run the cmd, and then also fail,
+# making sure a test case fails.
+test_fsh() {
+    echo "> $@"
+    eval $(shellquote "$@")
+    echo ""
+    false
 }
 
-test_fsh() {
-	echo "> $@"
-	eval "$@"
-	echo ""
-	false
+# Same as sharness' test_cmp but using test_fsh (to see the output).
+# We have to do it twice, so the first diff output doesn't show unless it's
+# broken.
+test_cmp() {
+	diff -q "$@" >/dev/null || test_fsh diff -u "$@"
+}
+
+# Same as test_cmp above, but we sort files before comparing them.
+test_sort_cmp() {
+	sort "$1" >"$1_sorted" &&
+	sort "$2" >"$2_sorted" &&
+	test_cmp "$1_sorted" "$2_sorted"
+}
+
+# Same as test_cmp above, but we standardize directory
+# separators before comparing the files.
+test_path_cmp() {
+	sed -e "s/\\\\/\//g" "$1" >"$1_std" &&
+	sed -e "s/\\\\/\//g" "$2" >"$2_std" &&
+	test_cmp "$1_std" "$2_std"
+}
+
+# Depending on GNU seq availability is not nice.
+# Git also has test_seq but it uses Perl.
+test_seq() {
+	test "$1" -le "$2" || return
+	i="$1"
+	j="$2"
+	while test "$i" -le "$j"
+	do
+		echo "$i"
+		i=$(expr "$i" + 1)
+	done
+}
+
+test_cmp_repeat_10_sec() {
+  for i in $(test_seq 1 100)
+  do
+    test_cmp "$1" "$2" >/dev/null && return
+    go-sleep 100ms
+  done
+  test_cmp "$1" "$2"
 }
 
 test_run_repeat_60_sec() {
-	for i in $(test_seq 1 600)
-	do
-		(test_eval_ "$1") && return
-		go-sleep 100ms
-	done
-	return 1 # failed
+  for i in $(test_seq 1 600)
+  do
+    (test_eval_ "$1") && return
+    go-sleep 100ms
+  done
+  return 1 # failed
 }
 
 test_wait_output_n_lines_60_sec() {
-	for i in $(test_seq 1 600)
-	do
-		test $(cat "$1" | wc -l | tr -d " ") -ge $2 && return
-		go-sleep 100ms
-	done
-	actual=$(cat "$1" | wc -l | tr -d " ")
-	test_fsh "expected $2 lines of output. got $actual"
+  for i in $(test_seq 1 600)
+  do
+    test $(cat "$1" | wc -l | tr -d " ") -ge $2 && return
+    go-sleep 100ms
+  done
+  actual=$(cat "$1" | wc -l | tr -d " ")
+  test_fsh "expected $2 lines of output. got $actual"
 }
 
 test_wait_open_tcp_port_10_sec() {
-	for i in $(test_seq 1 100)
-	do
-		# this is not a perfect check, but it's portable.
-		# cant count on ss. not installed everywhere.
-		# cant count on netstat using : or . as port delim. differ across platforms.
-		echo $(netstat -aln | egrep "^tcp.*LISTEN" | egrep "[.:]$1" | wc -l) -gt 0
-		if [ $(netstat -aln | egrep "^tcp.*LISTEN" | egrep "[.:]$1" | wc -l) -gt 0 ]; then
-			return 0
-		fi
-		go-sleep 100ms
-	done
-	return 1
+  for i in $(test_seq 1 100)
+  do
+    # this is not a perfect check, but it's portable.
+    # cant count on ss. not installed everywhere.
+    # cant count on netstat using : or . as port delim. differ across platforms.
+    echo $(netstat -aln | egrep "^tcp.*LISTEN" | egrep "[.:]$1" | wc -l) -gt 0
+    if [ $(netstat -aln | egrep "^tcp.*LISTEN" | egrep "[.:]$1" | wc -l) -gt 0 ]; then
+      return 0
+    fi
+    go-sleep 100ms
+  done
+  return 1
 }
 
 
@@ -99,276 +191,352 @@ test_wait_open_tcp_port_10_sec() {
 # was setting really weird things and am not sure why.
 test_config_set() {
 
-	# grab flags (like --bool in "ipfs config --bool")
-	test_cfg_flags="" # unset in case.
-	test "$#" = 3 && { test_cfg_flags=$1; shift; }
+  # grab flags (like --bool in "ipfs config --bool")
+  test_cfg_flags="" # unset in case.
+  test "$#" = 3 && { test_cfg_flags=$1; shift; }
 
-	test_cfg_key=$1
-	test_cfg_val=$2
+  test_cfg_key=$1
+  test_cfg_val=$2
 
-	# when verbose, tell the user what config values are being set
-	test_cfg_cmd="ipfs config $test_cfg_flags \"$test_cfg_key\" \"$test_cfg_val\""
-	test "$TEST_VERBOSE" = 1 && echo "$test_cfg_cmd"
+  # when verbose, tell the user what config values are being set
+  test_cfg_cmd="ipfs config $test_cfg_flags \"$test_cfg_key\" \"$test_cfg_val\""
+  test "$TEST_VERBOSE" = 1 && echo "$test_cfg_cmd"
 
-	# ok try setting the config key/val pair.
-	ipfs config $test_cfg_flags "$test_cfg_key" "$test_cfg_val"
-	echo "$test_cfg_val" >cfg_set_expected
-	ipfs config "$test_cfg_key" >cfg_set_actual
-	test_cmp cfg_set_expected cfg_set_actual
+  # ok try setting the config key/val pair.
+  ipfs config $test_cfg_flags "$test_cfg_key" "$test_cfg_val"
+  echo "$test_cfg_val" >cfg_set_expected
+  ipfs config "$test_cfg_key" >cfg_set_actual
+  test_cmp cfg_set_expected cfg_set_actual
 }
 
 test_init_ipfs() {
 
-	# we have a problem where initializing daemons with the same api port
-	# often fails-- it hangs indefinitely. The proper solution is to make
-	# ipfs pick an unused port for the api on startup, and then use that.
-	# Unfortunately, ipfs doesnt yet know how to do this-- the api port
-	# must be specified. Until ipfs learns how to do this, we must use
-	# specific port numbers, which may still fail but less frequently
-	# if we at least use different ones.
 
-	# Using RANDOM like this is clearly wrong-- it samples with replacement
-	# and it doesnt even check the port is unused. this is a trivial stop gap
-	# until the proper solution is implemented.
-	RANDOM=$$
-	PORT_API=5001 #$((RANDOM % 3000 + 5100))
-	ADDR_API="/ip4/127.0.0.1/tcp/$PORT_API"
+  # we set the Addresses.API config variable.
+  # the cli client knows to use it, so only need to set.
+  # todo: in the future, use env?
 
-	PORT_GWAY=$((RANDOM % 3000 + 8100))
-	ADDR_GWAY="/ip4/127.0.0.1/tcp/$PORT_GWAY"
+  test_expect_success "ipfs init succeeds" '
+    export IPFS_PATH="$(pwd)/.ipfs" &&
+    ipfs init --profile=test > /dev/null
+  '
 
-	PORT_SWARM=$((RANDOM % 3000 + 12000))
-	ADDR_SWARM="[
-  \"/ip4/0.0.0.0/tcp/$PORT_SWARM\"
-]"
+  test_expect_success "prepare config -- mounting" '
+    mkdir mountdir ipfs ipns &&
+    test_config_set Mounts.IPFS "$(pwd)/ipfs" &&
+    test_config_set Mounts.IPNS "$(pwd)/ipns" ||
+    test_fsh cat "\"$IPFS_PATH/config\""
+  '
 
-
-	# we set the Addresses.API config variable.
-	# the cli client knows to use it, so only need to set.
-	# todo: in the future, use env?
-
-	test_expect_success "ipfs init succeeds" '
-		export IPFS_PATH="$(pwd)/.ipfs" &&
-		ipfs init -b=1024 > /dev/null
-	'
-
-	test_expect_success "prepare config -- mounting and bootstrap rm" '
-		mkdir mountdir ipfs ipns &&
-		test_config_set Mounts.IPFS "$(pwd)/ipfs" &&
-		test_config_set Mounts.IPNS "$(pwd)/ipns" &&
-		test_config_set Addresses.API "$ADDR_API" &&
-		test_config_set Addresses.Gateway "$ADDR_GWAY" &&
-		test_config_set --json Addresses.Swarm "$ADDR_SWARM" &&
-		ipfs bootstrap rm --all ||
-		test_fsh cat "\"$IPFS_PATH/config\""
-	'
-
-}
-
-test_config_ipfs_gateway_readonly() {
-	ADDR_GWAY=$1
-	test_expect_success "prepare config -- gateway address" '
-		test "$ADDR_GWAY" != "" &&
-		test_config_set "Addresses.Gateway" "$ADDR_GWAY"
-	'
-
-	# tell the user what's going on if they messed up the call.
-	if test "$#" = 0; then
-		echo "#			Error: must call with an address, for example:"
-		echo '#			test_config_ipfs_gateway_readonly "/ip4/0.0.0.0/tcp/5002"'
-		echo '#'
-	fi
 }
 
 test_config_ipfs_gateway_writable() {
+  test_expect_success "prepare config -- gateway writable" '
+    test_config_set --bool Gateway.Writable true ||
+    test_fsh cat "\"$IPFS_PATH/config\""
+  '
+}
 
-	test_config_ipfs_gateway_readonly $1
+test_wait_for_file() {
+  loops=$1
+  delay=$2
+  file=$3
+  fwaitc=0
+  while ! test -f "$file"
+  do
+    if test $fwaitc -ge $loops
+    then
+      echo "Error: timed out waiting for file: $file"
+      return 1
+    fi
 
-	test_expect_success "prepare config -- gateway writable" '
-		test_config_set --bool Gateway.Writable true ||
-		test_fsh cat "\"$IPFS_PATH/config\""
-	'
+    go-sleep $delay
+    fwaitc=`expr $fwaitc + 1`
+  done
+}
+
+test_set_address_vars() {
+  daemon_output="$1"
+
+  test_expect_success "set up address variables" '
+    API_MADDR=$(cat "$IPFS_PATH/api") &&
+    API_ADDR=$(convert_tcp_maddr $API_MADDR) &&
+    API_PORT=$(port_from_maddr $API_MADDR) &&
+
+    GWAY_MADDR=$(sed -n "s/^Gateway (.*) server listening on //p" "$daemon_output") &&
+    GWAY_ADDR=$(convert_tcp_maddr $GWAY_MADDR) &&
+    GWAY_PORT=$(port_from_maddr $GWAY_MADDR)
+  '
+
+  if ipfs swarm addrs local >/dev/null 2>&1; then
+    test_expect_success "get swarm addresses" '
+      ipfs swarm addrs local > addrs_out
+    '
+
+    test_expect_success "set swarm address vars" '
+      SWARM_MADDR=$(grep "127.0.0.1" addrs_out) &&
+      SWARM_PORT=$(port_from_maddr $SWARM_MADDR)
+    '
+  fi
 }
 
 test_launch_ipfs_daemon() {
 
-	args="$@"
+  args=("$@")
 
-	test_expect_success "'ipfs daemon' succeeds" '
-		ipfs daemon $args >actual_daemon 2>daemon_err &
-	'
+  test "$TEST_ULIMIT_PRESET" != 1 && ulimit -n 2048
 
-	# we say the daemon is ready when the API server is ready.
-	test_expect_success "'ipfs daemon' is ready" '
-		IPFS_PID=$! &&
-		pollEndpoint -ep=/version -host=$ADDR_API -v -tout=1s -tries=60 2>poll_apierr > poll_apiout ||
-		test_fsh cat actual_daemon || test_fsh cat daemon_err || test_fsh cat poll_apierr || test_fsh cat poll_apiout
-	'
+  test_expect_success "'ipfs daemon' succeeds" '
+    ipfs daemon "${args[@]}" >actual_daemon 2>daemon_err &
+    IPFS_PID=$!
+  '
 
-	if test "$ADDR_GWAY" != ""; then
-		test_expect_success "'ipfs daemon' output includes Gateway address" '
-			pollEndpoint -ep=/version -host=$ADDR_GWAY -v -tout=1s -tries=60 2>poll_gwerr > poll_gwout ||
-			test_fsh cat daemon_err || test_fsh cat poll_gwerr || test_fsh cat poll_gwout
-		'
-	fi
+  # wait for api file to show up
+  test_expect_success "api file shows up" '
+    test_wait_for_file 50 100ms "$IPFS_PATH/api"
+  '
+
+  test_set_address_vars actual_daemon
+
+  # we say the daemon is ready when the API server is ready.
+  test_expect_success "'ipfs daemon' is ready" '
+    pollEndpoint -host=$API_MADDR -v -tout=1s -tries=60 2>poll_apierr > poll_apiout ||
+    test_fsh cat actual_daemon || test_fsh cat daemon_err || test_fsh cat poll_apierr || test_fsh cat poll_apiout
+  '
+}
+
+do_umount() {
+  if [ "$(uname -s)" = "Linux" ]; then
+  fusermount -u "$1"
+  else
+  umount "$1"
+  fi
 }
 
 test_mount_ipfs() {
 
-	# make sure stuff is unmounted first.
-	test_expect_success FUSE "'ipfs mount' succeeds" '
-		umount "$(pwd)/ipfs" || true &&
-		umount "$(pwd)/ipns" || true &&
-		ipfs mount >actual
-	'
+  # make sure stuff is unmounted first.
+  test_expect_success FUSE "'ipfs mount' succeeds" '
+    do_umount "$(pwd)/ipfs" || true &&
+    do_umount "$(pwd)/ipns" || true &&
+    ipfs mount >actual
+  '
 
-	test_expect_success FUSE "'ipfs mount' output looks good" '
-		echo "IPFS mounted at: $(pwd)/ipfs" >expected &&
-		echo "IPNS mounted at: $(pwd)/ipns" >>expected &&
-		test_cmp expected actual
-	'
+  test_expect_success FUSE "'ipfs mount' output looks good" '
+    echo "IPFS mounted at: $(pwd)/ipfs" >expected &&
+    echo "IPNS mounted at: $(pwd)/ipns" >>expected &&
+    test_cmp expected actual
+  '
 
 }
 
 test_launch_ipfs_daemon_and_mount() {
 
-	test_init_ipfs
-	test_launch_ipfs_daemon
-	test_mount_ipfs
+  test_init_ipfs
+  test_launch_ipfs_daemon
+  test_mount_ipfs
 
 }
 
 test_kill_repeat_10_sec() {
-	# try to shut down once + wait for graceful exit
-	kill $1
-	for i in $(test_seq 1 100)
-	do
-		go-sleep 100ms
-		! kill -0 $1 2>/dev/null && return
-	done
+  # try to shut down once + wait for graceful exit
+  kill $1
+  for i in $(test_seq 1 100)
+  do
+    go-sleep 100ms
+    ! kill -0 $1 2>/dev/null && return
+  done
 
-	# if not, try once more, which will skip graceful exit
-	kill $1
-	go-sleep 1s
-	! kill -0 $1 2>/dev/null && return
+  # if not, try once more, which will skip graceful exit
+  kill $1
+  go-sleep 1s
+  ! kill -0 $1 2>/dev/null && return
 
-	# ok, no hope. kill it to prevent it messing with other tests
-	kill -9 $1 2>/dev/null
-	return 1
+  # ok, no hope. kill it to prevent it messing with other tests
+  kill -9 $1 2>/dev/null
+  return 1
 }
 
 test_kill_ipfs_daemon() {
 
-	test_expect_success "'ipfs daemon' is still running" '
-		kill -0 $IPFS_PID
-	'
+  test_expect_success "'ipfs daemon' is still running" '
+    kill -0 $IPFS_PID
+  '
 
-	test_expect_success "'ipfs daemon' can be killed" '
-		test_kill_repeat_10_sec $IPFS_PID
-	'
+  test_expect_success "'ipfs daemon' can be killed" '
+    test_kill_repeat_10_sec $IPFS_PID
+  '
 }
 
 test_curl_resp_http_code() {
-	curl -I "$1" >curl_output || {
-		echo "curl error with url: '$1'"
-		echo "curl output was:"
-		cat curl_output
-		return 1
-	}
-	shift &&
-	RESP=$(head -1 curl_output) &&
-	while test "$#" -gt 0
-	do
-		expr "$RESP" : "$1" >/dev/null && return
-		shift
-	done
-	echo "curl response didn't match!"
-	echo "curl response was: '$RESP'"
-	echo "curl output was:"
-	cat curl_output
-	return 1
+  curl -I "$1" >curl_output || {
+    echo "curl error with url: '$1'"
+    echo "curl output was:"
+    cat curl_output
+    return 1
+  }
+  shift &&
+  RESP=$(head -1 curl_output) &&
+  while test "$#" -gt 0
+  do
+    expr "$RESP" : "$1" >/dev/null && return
+    shift
+  done
+  echo "curl response didn't match!"
+  echo "curl response was: '$RESP'"
+  echo "curl output was:"
+  cat curl_output
+  return 1
 }
 
 test_must_be_empty() {
-	if test -s "$1"
-	then
-		echo "'$1' is not empty, it contains:"
-		cat "$1"
-		return 1
-	fi
+  if test -s "$1"
+  then
+    echo "'$1' is not empty, it contains:"
+    cat "$1"
+    return 1
+  fi
 }
 
 test_should_contain() {
-	test "$#" = 2 || error "bug in the test script: not 2 parameters to test_should_contain"
-	if ! grep -q "$1" "$2"
-	then
-		echo "'$2' does not contain '$1', it contains:"
-		cat "$2"
-		return 1
-	fi
+  test "$#" = 2 || error "bug in the test script: not 2 parameters to test_should_contain"
+  if ! grep -q "$1" "$2"
+  then
+    echo "'$2' does not contain '$1', it contains:"
+    cat "$2"
+    return 1
+  fi
 }
 
 test_str_contains() {
-	find=$1
-	shift
-	echo "$@" | grep "$find" >/dev/null
+  find=$1
+  shift
+  echo "$@" | egrep "\b$find\b" >/dev/null
 }
 
 disk_usage() {
-    # normalize du across systems
-    case $(uname -s) in
-        Linux)
-            DU="du -sb"
-            ;;
-        FreeBSD)
-            DU="du -s -A -B 1"
-            ;;
-        Darwin | DragonFly)
-            DU="du"
-            ;;
-    esac
-        $DU "$1" | awk "{print \$1}"
+  # normalize du across systems
+  case $(uname -s) in
+    Linux)
+      DU="du -sb"
+      M=1
+      ;;
+    FreeBSD)
+      DU="du -s -A -B 1"
+      M=512
+      ;;
+    Darwin | DragonFly | *)
+      DU="du -s"
+      M=512
+      ;;
+  esac
+  expr $($DU "$1" | awk "{print \$1}") "*" "$M"
 }
 
 # output a file's permission in human readable format
 generic_stat() {
-    # normalize stat across systems
+  # normalize stat across systems
+  case $(uname -s) in
+    Linux)
+      _STAT="stat -c %A"
+      ;;
+    FreeBSD | Darwin | DragonFly)
+      _STAT="stat -f %Sp"
+      ;;
+    *)
+        echo "unsupported OS" >&2
+        exit 1
+        ;;
+  esac
+  $_STAT "$1" || echo "failed" # Avoid returning nothing.
+}
+
+# output a file's permission in human readable format
+file_size() {
     case $(uname -s) in
         Linux)
-            _STAT="stat -c %A"
+            _STAT="stat --format=%s"
             ;;
         FreeBSD | Darwin | DragonFly)
-            _STAT="stat -f %Sp"
+            _STAT="stat -f%z"
+            ;;
+        *)
+            echo "unsupported OS" >&2
+            exit 1
             ;;
     esac
     $_STAT "$1"
 }
 
+# len 46: 2048-bit RSA keys, b58mh-encoded
+# len 52: ED25519 keys, b58mh-encoded
+# len 56: 2048-bit RSA keys, base36-encoded
+# len 62: ED25519 keys, base36-encoded
 test_check_peerid() {
-	peeridlen=$(echo "$1" | tr -dC "[:alnum:]" | wc -c | tr -d " ") &&
-	test "$peeridlen" = "46" || {
-		echo "Bad peerid '$1' with len '$peeridlen'"
-		return 1
-	}
+  peeridlen=$(echo "$1" | tr -dC "[:alnum:]" | wc -c | tr -d " ") &&
+  test "$peeridlen" = "46" -o "$peeridlen" = "52" -o "$peeridlen" = "56" -o "$peeridlen" = "62" || {
+    echo "Bad peerid '$1' with len '$peeridlen'"
+    return 1
+  }
 }
 
-
-make_package() {
-	dir=$1
-	lang=$2
-	mkdir -p $dir
-	test_expect_success "gx init succeeds" '
-		(cd $dir && gx init --lang="$lang")
-	'
+test_check_rsa2048_b58mh_peerid() {
+  peeridlen=$(echo "$1" | tr -dC "[:alnum:]" | wc -c | tr -d " ") &&
+  test "$peeridlen" = "46" || {
+    echo "Bad RSA2048 B58MH peerid '$1' with len '$peeridlen'"
+    return 1
+  }
 }
 
-publish_package() {
-	pkgdir=$1
-	(cd $pkgdir && gx publish) | awk '{ print $6 }'
+test_check_ed25519_b58mh_peerid() {
+  peeridlen=$(echo "$1" | tr -dC "[:alnum:]" | wc -c | tr -d " ") &&
+  test "$peeridlen" = "52" || {
+    echo "Bad ED25519 B58MH peerid '$1' with len '$peeridlen'"
+    return 1
+  }
 }
 
-pkg_run() {
-	dir=$1
-	shift
-	(cd $dir && $@)
+test_check_rsa2048_base36_peerid() {
+  peeridlen=$(echo "$1" | tr -dC "[:alnum:]" | wc -c | tr -d " ") &&
+  test "$peeridlen" = "56" || {
+    echo "Bad RSA2048 B36CID peerid '$1' with len '$peeridlen'"
+    return 1
+  }
+}
+
+test_check_ed25519_base36_peerid() {
+  peeridlen=$(echo "$1" | tr -dC "[:alnum:]" | wc -c | tr -d " ") &&
+  test "$peeridlen" = "62" || {
+    echo "Bad ED25519 B36CID peerid '$1' with len '$peeridlen'"
+    return 1
+  }
+}
+
+convert_tcp_maddr() {
+  echo $1 | awk -F'/' '{ printf "%s:%s", $3, $5 }'
+}
+
+port_from_maddr() {
+  echo $1 | awk -F'/' '{ print $NF }'
+}
+
+findprovs_empty() {
+  test_expect_success 'findprovs '$1' succeeds' '
+    ipfsi 1 dht findprovs -n 1 '$1' > findprovsOut
+  '
+
+  test_expect_success "findprovs $1 output is empty" '
+    test_must_be_empty findprovsOut
+  '
+}
+
+findprovs_expect() {
+  test_expect_success 'findprovs '$1' succeeds' '
+    ipfsi 1 dht findprovs -n 1 '$1' > findprovsOut &&
+    echo '$2' > expected
+  '
+
+  test_expect_success "findprovs $1 output looks good" '
+    test_cmp findprovsOut expected
+  '
 }

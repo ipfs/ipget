@@ -1,27 +1,38 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 test_description="test the ipget command by spawning a shell"
 
-. ./lib/sharness/sharness.sh
+. lib/test-lib.sh
 
-test_expect_success "retrieve a known popular single file" "
-    ipget --node=spawn QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat.gif &&
-    echo 'c5ea0d6cacf1e54635685803ec4edbe0d4fe8465' > expected &&
-    shasum cat.gif | cut -d ' ' -f 1 > actual &&
-    diff expected actual
-"
+# start the local ipfs node
+test_init_ipfs
+test_launch_ipfs_daemon
 
-test_expect_success "retrieve a known popular file with -o" "
-    ipget -o meow.gif --node=spawn QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat.gif &&
-    echo 'c5ea0d6cacf1e54635685803ec4edbe0d4fe8465' > expected &&
-    shasum meow.gif | cut -d ' ' -f 1 > actual &&
-    diff expected actual
-"
+PEER_ID="$(ipfs id -f'<id>')"
 
-test_expect_success "retrieve a directory" "
-    ipget --node=spawn QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF &&
-    ls QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF > /dev/null &&
-    ls QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat.gif > /dev/null
-"
+test_expect_success "create a test directory" '
+ 	mkdir test_dir &&
+	echo "hello ipget" > test_dir/test_file &&
+	ipfs add -Qr test_dir > hash
+'
+
+test_expect_success "retrieve a single file" '
+	echo "$SWARM_MADDR"
+    ipget --peers="$SWARM_MADDR/p2p/$PEER_ID" --node=spawn "/ipfs/$(<hash)/test_file" &&
+    test_cmp test_dir/test_file test_file
+'
+
+test_expect_success "retrieve a single file with -o" '
+    ipget --peers="$SWARM_MADDR/p2p/$PEER_ID" --node=spawn -o out_file "/ipfs/$(<hash)/test_file" &&
+    test_cmp test_dir/test_file out_file
+'
+
+test_expect_success "retrieve a directory" '
+    ipget --peers="$SWARM_MADDR/p2p/$PEER_ID" --node=spawn "/ipfs/$(<hash)" &&
+    diff -ru "$(<hash)" test_dir
+'
+
+# kill the local ipfs node
+test_kill_ipfs_daemon
 
 test_done

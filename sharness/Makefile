@@ -44,18 +44,20 @@ bin/ipget:
 	$(MAKE) -C .. build
 	cp ../ipget bin/ipget
 
+# Usee the linked go-ipfs.
 bin/ipfs:
 	mkdir -p bin
-	go get github.com/ipfs/ipfs-update
-	ipfs-update fetch v0.4.22 --output=bin/ipfs
+	go build -o bin/ipfs github.com/ipfs/go-ipfs/cmd/ipfs
 
+# Use go-sleep from our test deps.
 bin/go-sleep:
-	go get -d github.com/chriscool/go-sleep
-	go build -o bin/go-sleep github.com/chriscool/go-sleep
+	mkdir -p bin
+	cd dependencies && go build -o ../bin/go-sleep github.com/chriscool/go-sleep
 
+# Use pollEndpoints from our test deps.
 bin/pollEndpoint:
-	go get -d github.com/whyrusleeping/pollEndpoint
-	go build -o bin/pollEndpoint github.com/whyrusleeping/pollEndpoint
+	mkdir -p bin
+	cd dependencies && go build -o ../bin/pollEndpoint github.com/whyrusleeping/pollEndpoint
 
 race:
 	make GOFLAGS=-race all

@@ -1,25 +1,33 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 test_description="test the ipget argument parser"
 
-. ./lib/sharness/sharness.sh
+. lib/test-lib.sh
 
-test_expect_success "retrieve a known popular single file with a (HTTP) gateway URL" "
-    ipget http://ipfs.io/ipfs/QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat.gif &&
-    echo 'c5ea0d6cacf1e54635685803ec4edbe0d4fe8465' > expected &&
-    shasum cat.gif | cut -d ' ' -f 1 > actual &&
-    diff expected actual
-"
+# start the local ipfs node
+test_init_ipfs
+test_launch_ipfs_daemon
 
-test_expect_success "retrieve a known popular single file with browser protocol URI" "
-    ipget ipfs://QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat.gif &&
-    echo 'c5ea0d6cacf1e54635685803ec4edbe0d4fe8465' > expected &&
-    shasum cat.gif | cut -d ' ' -f 1 > actual &&
-    diff expected actual
-"
+test_expect_success "create a test file" '
+	echo "hello ipget" > test_file &&
+	ipfs add -q test_file > hash
+	cat hash
+'
+test_expect_success "retrieve a file with a known-gateway URL" '
+    ipget -o from_gateway --node=local "https://ipfs.io/ipfs/$(<hash)" &&
+    test_cmp test_file from_gateway
+'
 
-test_expect_failure "don't allow non-(HTTP)gateway URLS" "
-    ipget ftp://ipfs.io/ipfs/QmQ2r6iMNpky5f1m4cnm3Yqw8VSvjuKpTcK1X7dBR1LkJF/cat.gif
-"
+test_expect_success "retrieve a file with protocol URI" '
+    ipget -o from_gateway --node=local "ipfs://$(<hash)" &&
+    test_cmp test_file from_gateway
+'
+
+test_expect_success "don't allow non-(HTTP)gateway URLS" '
+    test_expect_code 1 ipget --node=local "ftp://ipfs.io/ipfs/$(<hash)"
+'
+
+# kill the local ipfs node
+test_kill_ipfs_daemon
 
 test_done
