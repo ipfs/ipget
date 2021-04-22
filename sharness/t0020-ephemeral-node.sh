@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 test_description="test the ipget command by spawning a shell"
 

@@ -1,0 +1,22 @@
+From 5e95de1de69d2c14f8a4a8a2ee083e5dee7073d9 Mon Sep 17 00:00:00 2001
+From: Steven Allen <steven@stebalien.com>
+Date: Wed, 21 Apr 2021 22:18:54 -0700
+Subject: [PATCH] switch to bash
+
+---
+ sharness.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sharness.sh b/sharness.sh
+index 6750ff7..be324c7 100644
+--- a/sharness.sh
++++ b/sharness.sh
+@@ -1,4 +1,4 @@
+-#!/bin/sh
++#!/usr/bin/env bash
+ #
+ # Copyright (c) 2011-2012 Mathias Lafeldt
+ # Copyright (c) 2005-2012 Git project
+-- 
+2.31.1
+
