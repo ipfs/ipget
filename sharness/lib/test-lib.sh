@@ -149,7 +149,7 @@ test_init_ipfs() {
 
 	test_expect_success "ipfs init succeeds" '
 		export IPFS_PATH="$(pwd)/.ipfs" &&
-		ipfs init -b=1024 > /dev/null
+		ipfs init > /dev/null
 	'
 
 	test_expect_success "prepare config -- mounting and bootstrap rm" '
