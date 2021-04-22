@@ -55,7 +55,7 @@ USAGE:
    ipget [global options] command [command options] [arguments...]
 
 VERSION:
-   0.2.0
+   0.6.1
 
 COMMANDS:
 GLOBAL OPTIONS:
