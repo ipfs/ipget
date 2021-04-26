@@ -1,5 +1,6 @@
 # Minimum version numbers for software required to build IPFS
-IPFS_MIN_GO_VERSION = 1.14
+IPFS_MIN_GO_VERSION = 1.15
+VERSION = $(shell git describe --tags)
 
 # use things in our bin before any other system binaries
 export PATH := bin:$(PATH)
@@ -14,7 +15,7 @@ install: deps
 	go install
 
 build: deps
-	go build
+	go build -ldflags="-X 'main.version=${VERSION}'"
 
 clean:
 	rm -rf ./ipget

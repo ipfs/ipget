@@ -19,11 +19,13 @@ import (
 	pb "gopkg.in/cheggaaa/pb.v1"
 )
 
+var version string
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "ipget"
 	app.Usage = "Retrieve and save IPFS objects."
-	app.Version = "0.7.0"
+	app.Version = version
 	app.Flags = []cli.Flag{
 		&cli.StringFlag{
 			Name:    "output",
