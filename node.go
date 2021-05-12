@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/ipfs/go-ipfs-config"
@@ -94,6 +95,11 @@ func tmpNode(ctx context.Context) (iface.CoreAPI, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get temp dir: %s", err)
 	}
+
+	// Cleanup temp dir on exit
+	addCleanup(func() error {
+		return os.RemoveAll(dir)
+	})
 
 	identity, err := config.CreateIdentity(ioutil.Discard, []options.KeyGenerateOption{
 		options.Key.Type(options.Ed25519Key),

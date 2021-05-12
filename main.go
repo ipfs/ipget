@@ -10,6 +10,7 @@ import (
 	gopath "path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 
 	files "github.com/ipfs/go-ipfs-files"
@@ -19,7 +20,15 @@ import (
 	pb "gopkg.in/cheggaaa/pb.v1"
 )
 
+var (
+	cleanup      []func() error
+	cleanupMutex sync.Mutex
+)
+
 func main() {
+	// Do any cleanup on exit
+	defer doCleanup()
+
 	app := cli.NewApp()
 	app.Name = "ipget"
 	app.Usage = "Retrieve and save IPFS objects."
@@ -124,6 +133,7 @@ func main() {
 	err := app.Run(args)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
+		doCleanup()
 		os.Exit(1)
 	}
 }
@@ -228,5 +238,22 @@ func writeToRec(nd files.Node, fpath string, bar *pb.ProgressBar) error {
 		return entries.Err()
 	default:
 		return fmt.Errorf("file type %T at %q is not supported", nd, fpath)
+	}
+}
+
+func addCleanup(f func() error) {
+	cleanupMutex.Lock()
+	defer cleanupMutex.Unlock()
+	cleanup = append(cleanup, f)
+}
+
+func doCleanup() {
+	cleanupMutex.Lock()
+	defer cleanupMutex.Unlock()
+
+	for _, f := range cleanup {
+		if err := f(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
 	}
 }
