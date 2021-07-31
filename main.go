@@ -13,11 +13,11 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/cheggaaa/pb"
 	files "github.com/ipfs/go-ipfs-files"
 	iface "github.com/ipfs/interface-go-ipfs-core"
 	ipath "github.com/ipfs/interface-go-ipfs-core/path"
 	cli "github.com/urfave/cli/v2"
-	pb "gopkg.in/cheggaaa/pb.v1"
 )
 
 var (
