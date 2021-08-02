@@ -1,5 +1,5 @@
 # Minimum version numbers for software required to build IPFS
-IPFS_MIN_GO_VERSION = 1.14
+IPFS_MIN_GO_VERSION = 1.15
 
 # use things in our bin before any other system binaries
 export PATH := bin:$(PATH)
