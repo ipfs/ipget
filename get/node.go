@@ -1,4 +1,4 @@
-package main
+package get
 
 import (
 	"context"
@@ -7,19 +7,19 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ipfs/go-ipfs-config"
+	config "github.com/ipfs/go-ipfs-config"
 	"github.com/ipfs/go-ipfs/core"
 	"github.com/ipfs/go-ipfs/core/coreapi"
 	"github.com/ipfs/go-ipfs/core/node/libp2p"
 	"github.com/ipfs/go-ipfs/plugin/loader"
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
-	"github.com/ipfs/interface-go-ipfs-core"
+	iface "github.com/ipfs/interface-go-ipfs-core"
 	"github.com/ipfs/interface-go-ipfs-core/options"
 )
 
 type CfgOpt func(*config.Config)
 
-func spawn(ctx context.Context) (iface.CoreAPI, error) {
+func Spawn(ctx context.Context) (iface.CoreAPI, error) {
 	defaultPath, err := config.PathRoot()
 	if err != nil {
 		// shouldn't be possible
@@ -76,7 +76,7 @@ func open(ctx context.Context, repoPath string) (iface.CoreAPI, error) {
 	return coreapi.NewCoreAPI(node)
 }
 
-func temp(ctx context.Context) (iface.CoreAPI, error) {
+func Temp(ctx context.Context) (iface.CoreAPI, error) {
 	defaultPath, err := config.PathRoot()
 	if err != nil {
 		// shouldn't be possible
@@ -97,7 +97,7 @@ func tmpNode(ctx context.Context) (iface.CoreAPI, error) {
 	}
 
 	// Cleanup temp dir on exit
-	addCleanup(func() error {
+	AddCleanup(func() error {
 		return os.RemoveAll(dir)
 	})
 

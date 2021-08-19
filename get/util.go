@@ -1,8 +1,10 @@
-package main
+package get
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"os"
 	"sync"
 
 	iface "github.com/ipfs/interface-go-ipfs-core"
@@ -10,7 +12,13 @@ import (
 	ma "github.com/multiformats/go-multiaddr"
 )
 
-func connect(ctx context.Context, ipfs iface.CoreAPI, peers []string) error {
+var (
+	cleanup      []func() error
+	cleanupMutex sync.Mutex
+)
+
+// Connect Gets us connected to the IPFS network
+func Connect(ctx context.Context, ipfs iface.CoreAPI, peers []string) error {
 	var wg sync.WaitGroup
 	pinfos := make(map[peer.ID]*peer.AddrInfo, len(peers))
 	for _, addrStr := range peers {
@@ -44,4 +52,21 @@ func connect(ctx context.Context, ipfs iface.CoreAPI, peers []string) error {
 	}
 	wg.Wait()
 	return nil
+}
+
+func AddCleanup(f func() error) {
+	cleanupMutex.Lock()
+	defer cleanupMutex.Unlock()
+	cleanup = append(cleanup, f)
+}
+
+func DoCleanup() {
+	cleanupMutex.Lock()
+	defer cleanupMutex.Unlock()
+
+	for _, f := range cleanup {
+		if err := f(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+	}
 }

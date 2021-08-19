@@ -1,4 +1,4 @@
-package main
+package get
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	iface "github.com/ipfs/interface-go-ipfs-core"
 )
 
-func http(ctx context.Context) (iface.CoreAPI, error) {
+func Http(ctx context.Context) (iface.CoreAPI, error) {
 	httpApi, err := ipfshttp.NewLocalApi()
 	if err != nil {
 		return nil, err

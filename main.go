@@ -10,24 +10,19 @@ import (
 	gopath "path"
 	"path/filepath"
 	"strings"
-	"sync"
 	"syscall"
 
 	"github.com/cheggaaa/pb"
 	files "github.com/ipfs/go-ipfs-files"
 	iface "github.com/ipfs/interface-go-ipfs-core"
 	ipath "github.com/ipfs/interface-go-ipfs-core/path"
+	"github.com/ipfs/ipget/get"
 	cli "github.com/urfave/cli/v2"
-)
-
-var (
-	cleanup      []func() error
-	cleanupMutex sync.Mutex
 )
 
 func main() {
 	// Do any cleanup on exit
-	defer doCleanup()
+	defer get.DoCleanup()
 
 	app := cli.NewApp()
 	app.Name = "ipget"
@@ -81,17 +76,17 @@ func main() {
 		var ipfs iface.CoreAPI
 		switch c.String("node") {
 		case "fallback":
-			ipfs, err = http(ctx)
+			ipfs, err = get.Http(ctx)
 			if err == nil {
 				break
 			}
 			fallthrough
 		case "spawn":
-			ipfs, err = spawn(ctx)
+			ipfs, err = get.Spawn(ctx)
 		case "local":
-			ipfs, err = http(ctx)
+			ipfs, err = get.Http(ctx)
 		case "temp":
-			ipfs, err = temp(ctx)
+			ipfs, err = get.Temp(ctx)
 		default:
 			return fmt.Errorf("no such 'node' strategy, %q", c.String("node"))
 		}
@@ -99,7 +94,7 @@ func main() {
 			return err
 		}
 
-		go connect(ctx, ipfs, c.StringSlice("peers"))
+		go get.Connect(ctx, ipfs, c.StringSlice("peers"))
 
 		out, err := ipfs.Unixfs().Get(ctx, iPath)
 		if err != nil {
@@ -133,7 +128,7 @@ func main() {
 	err := app.Run(args)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		doCleanup()
+		get.DoCleanup()
 		os.Exit(1)
 	}
 }
@@ -238,22 +233,5 @@ func writeToRec(nd files.Node, fpath string, bar *pb.ProgressBar) error {
 		return entries.Err()
 	default:
 		return fmt.Errorf("file type %T at %q is not supported", nd, fpath)
-	}
-}
-
-func addCleanup(f func() error) {
-	cleanupMutex.Lock()
-	defer cleanupMutex.Unlock()
-	cleanup = append(cleanup, f)
-}
-
-func doCleanup() {
-	cleanupMutex.Lock()
-	defer cleanupMutex.Unlock()
-
-	for _, f := range cleanup {
-		if err := f(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-		}
 	}
 }
