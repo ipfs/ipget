@@ -167,7 +167,8 @@ func Get(fspath string, cid string) {
 
 	ipfs, err := Http(ctx)
 
-	go Connect(ctx, ipfs, nil)
+	var nilSlice []string
+	go Connect(ctx, ipfs, nilSlice)
 
 	iPath, err := ParsePath(cid)
 	if err != nil {
