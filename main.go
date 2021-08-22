@@ -62,7 +62,7 @@ func main() {
 
 	app.Action = func(c *cli.Context) error {
 		if !c.Args().Present() {
-			return fmt.Errorf("usage: ipget <ipfs ref>\n")
+			return fmt.Errorf("usage: ipget <ipfs ref>")
 		}
 
 		outPath := c.String("output")
