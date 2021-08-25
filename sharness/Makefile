@@ -47,7 +47,7 @@ bin/ipget:
 # Usee the linked go-ipfs.
 bin/ipfs:
 	mkdir -p bin
-	go build -o bin/ipfs github.com/ipfs/go-ipfs/cmd/ipfs
+	cd dependencies && go build -o ../bin/ipfs github.com/ipfs/go-ipfs/cmd/ipfs
 
 # Use go-sleep from our test deps.
 bin/go-sleep:
