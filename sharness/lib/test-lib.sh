@@ -98,6 +98,19 @@ if test "$TEST_VERBOSE" = 1; then
   echo '# TEST_OS='"$TEST_OS"
 fi
 
+# Quote arguments for sh eval
+shellquote() {
+	_space=''
+	for _arg
+	do
+		# On macOS, sed adds a newline character.
+		# With a printf wrapper the extra newline is removed.
+		printf "$_space'%s'" "$(printf "%s" "$_arg" | sed -e "s/'/'\\\\''/g;")"
+		_space=' '
+	done
+	printf '\n'
+}
+
 # Echo the args, run the cmd, and then also fail,
 # making sure a test case fails.
 test_fsh() {
