@@ -1,0 +1,29 @@
+on: [push, pull_request]
+name: Integration Tests
+
+jobs:
+  sharness:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ "ubuntu" ]
+        go: [ "1.16.x", "1.17.x" ]
+    runs-on: ${{ matrix.os }}-latest
+    name: Sharness (${{ matrix.os }} / go-${{ matrix.go }})
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go }}
+      - name: Go information
+        run: |
+          go version
+          go env
+      - name: Run sharness tests
+        run: |
+          make
+        env:
+          TEST_VERBOSE: 1
+        working-directory: sharness
