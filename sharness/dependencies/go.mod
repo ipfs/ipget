@@ -4,7 +4,9 @@ go 1.16
 
 require (
 	github.com/chriscool/go-sleep v0.0.0-20150606204034-743ab5f1bb48
-	github.com/ipfs/go-ipfs v0.9.1 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
+	github.com/ipfs/go-ipfs v0.9.1
+	github.com/ipfs/ipget v0.0.0-00010101000000-000000000000
 	github.com/whyrusleeping/pollEndpoint v0.0.0-20160930195253-e095275738b1
 )
+
+replace github.com/ipfs/ipget => ../../
