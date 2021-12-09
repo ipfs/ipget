@@ -7,13 +7,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ipfs/go-ipfs-config"
+	config "github.com/ipfs/go-ipfs-config"
 	"github.com/ipfs/go-ipfs/core"
 	"github.com/ipfs/go-ipfs/core/coreapi"
 	"github.com/ipfs/go-ipfs/core/node/libp2p"
 	"github.com/ipfs/go-ipfs/plugin/loader"
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
-	"github.com/ipfs/interface-go-ipfs-core"
+	iface "github.com/ipfs/interface-go-ipfs-core"
 	"github.com/ipfs/interface-go-ipfs-core/options"
 )
 
@@ -114,6 +114,8 @@ func tmpNode(ctx context.Context) (iface.CoreAPI, error) {
 
 	// configure the temporary node
 	cfg.Routing.Type = "dhtclient"
+
+	cfg.Datastore.NoSync = true
 
 	err = fsrepo.Init(dir, cfg)
 	if err != nil {

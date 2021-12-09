@@ -23,7 +23,21 @@ jobs:
           go env
       - name: Run sharness tests
         run: |
+          # we want to run tests against the current version of ipget
+          # however, that version might be in a fork so we need to replace the dependency
+          # backup the go.mod and go.sum files to restore them after we run the tests
+          cd dependencies
+          cp go.mod go.mod.bak
+          cp go.sum go.sum.bak
+          # make sure the tests run against the current version of ipget
+          go mod edit -replace github.com/ipfs/ipget=./../..
+          go mod tidy
+          cd ..
           make
+          cd dependencies
+          # restore the go.mod and go.sum files to their original state
+          mv go.mod.bak go.mod
+          mv go.sum.bak go.sum
         env:
           TEST_VERBOSE: 1
         working-directory: sharness
