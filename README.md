@@ -52,16 +52,18 @@ USAGE:
    ipget [global options] command [command options] [arguments...]
 
 VERSION:
-   0.7.0
+   0.8.0
 
 COMMANDS:
+   help, h  Shows a list of commands or help for one command
+
 GLOBAL OPTIONS:
    --output value, -o value  specify output location
-   --node temp, -n temp      specify ipfs node strategy ('local', 'spawn', temp or 'fallback') (default: "fallback")
+   --node value, -n value    specify ipfs node strategy ("local", "spawn", "temp" or "fallback") (default: "fallback")
    --peers value, -p value   specify a set of IPFS peers to connect to
-   --progress                show a progress bar
-   --help, -h                show help
-   --version, -v             print the version
+   --progress                show a progress bar (default: false)
+   --help, -h                show help (default: false)
+   --version, -v             print the version (default: false)
 ```
 
 ## Contribute
