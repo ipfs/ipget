@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/chriscool/go-sleep v0.0.0-20150606204034-743ab5f1bb48
-	github.com/ipfs/go-ipfs v0.13.0-rc1
+	github.com/ipfs/go-ipfs v0.12.3-0.20220512173254-53299e84e099
 	github.com/ipfs/ipget v0.8.1
 	github.com/whyrusleeping/pollEndpoint v0.0.0-20211207235059-e4819e26509a
 )
@@ -137,7 +137,7 @@ require (
 	github.com/libp2p/go-doh-resolver v0.4.0 // indirect
 	github.com/libp2p/go-eventbus v0.2.1 // indirect
 	github.com/libp2p/go-flow-metrics v0.0.3 // indirect
-	github.com/libp2p/go-libp2p v0.19.1 // indirect
+	github.com/libp2p/go-libp2p v0.19.2 // indirect
 	github.com/libp2p/go-libp2p-asn-util v0.2.0 // indirect
 	github.com/libp2p/go-libp2p-blankhost v0.3.0 // indirect
 	github.com/libp2p/go-libp2p-core v0.15.1 // indirect
