@@ -302,11 +302,13 @@ test_launch_ipfs_daemon() {
   test_expect_success "'ipfs daemon' succeeds" '
     ipfs daemon "${args[@]}" >actual_daemon 2>daemon_err &
     IPFS_PID=$!
+
+    echo "IPFS PID: $IPFS_PID"
   '
 
   # wait for api file to show up
   test_expect_success "api file shows up" '
-    test_wait_for_file 50 100ms "$IPFS_PATH/api"
+    test_wait_for_file 50 1000ms "$IPFS_PATH/api"
   '
 
   test_set_address_vars actual_daemon
