@@ -6,7 +6,7 @@ require (
 	github.com/cheggaaa/pb/v3 v3.0.8
 	github.com/ipfs/go-ipfs v0.13.0
 	github.com/ipfs/go-ipfs-files v0.1.1
-	github.com/ipfs/go-ipfs-http-client v0.3.1
+	github.com/ipfs/go-ipfs-http-client v0.4.0
 	github.com/ipfs/interface-go-ipfs-core v0.7.0
 	github.com/libp2p/go-libp2p-core v0.15.1
 	github.com/multiformats/go-multiaddr v0.5.0
