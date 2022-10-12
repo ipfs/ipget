@@ -1,6 +1,6 @@
 module github.com/ipfs/ipget
 
-go 1.17
+go 1.18
 
 require (
 	github.com/cheggaaa/pb/v3 v3.0.8

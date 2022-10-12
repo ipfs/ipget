@@ -1,6 +1,6 @@
 module github.com/ipfs/ipget/sharness/dependencies
 
-go 1.17
+go 1.18
 
 require (
 	github.com/chriscool/go-sleep v0.0.0-20150606204034-743ab5f1bb48
