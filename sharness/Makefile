@@ -44,10 +44,10 @@ bin/ipget:
 	$(MAKE) -C .. build
 	cp ../ipget bin/ipget
 
-# Usee the linked go-ipfs.
+# Usee the linked kubo.
 bin/ipfs:
 	mkdir -p bin
-	cd dependencies && go build -o ../bin/ipfs github.com/ipfs/go-ipfs/cmd/ipfs
+	cd dependencies && go build -o ../bin/ipfs github.com/ipfs/kubo/cmd/ipfs
 
 # Use go-sleep from our test deps.
 bin/go-sleep:
