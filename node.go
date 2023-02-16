@@ -3,18 +3,18 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 
-	config "github.com/ipfs/go-ipfs/config"
-	"github.com/ipfs/go-ipfs/core"
-	"github.com/ipfs/go-ipfs/core/coreapi"
-	"github.com/ipfs/go-ipfs/core/node/libp2p"
-	"github.com/ipfs/go-ipfs/plugin/loader"
-	"github.com/ipfs/go-ipfs/repo/fsrepo"
 	iface "github.com/ipfs/interface-go-ipfs-core"
 	"github.com/ipfs/interface-go-ipfs-core/options"
+	config "github.com/ipfs/kubo/config"
+	"github.com/ipfs/kubo/core"
+	"github.com/ipfs/kubo/core/coreapi"
+	"github.com/ipfs/kubo/core/node/libp2p"
+	"github.com/ipfs/kubo/plugin/loader"
+	"github.com/ipfs/kubo/repo/fsrepo"
 )
 
 type CfgOpt func(*config.Config)
@@ -91,7 +91,7 @@ func temp(ctx context.Context) (iface.CoreAPI, error) {
 }
 
 func tmpNode(ctx context.Context) (iface.CoreAPI, error) {
-	dir, err := ioutil.TempDir("", "ipfs-shell")
+	dir, err := os.MkdirTemp("", "ipfs-shell")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get temp dir: %s", err)
 	}
@@ -101,7 +101,7 @@ func tmpNode(ctx context.Context) (iface.CoreAPI, error) {
 		return os.RemoveAll(dir)
 	})
 
-	identity, err := config.CreateIdentity(ioutil.Discard, []options.KeyGenerateOption{
+	identity, err := config.CreateIdentity(io.Discard, []options.KeyGenerateOption{
 		options.Key.Type(options.Ed25519Key),
 	})
 	if err != nil {

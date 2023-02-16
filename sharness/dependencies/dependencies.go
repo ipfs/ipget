@@ -1,11 +1,10 @@
 //go:build tools
-// +build tools
 
 package tools
 
 import (
 	_ "github.com/chriscool/go-sleep"
-	_ "github.com/ipfs/go-ipfs/cmd/ipfs"
+	_ "github.com/ipfs/kubo/cmd/ipfs"
 	_ "github.com/whyrusleeping/pollEndpoint"
 
 	// We depend on ipget, then use a ../../ replace directive to ensure we end up using the
