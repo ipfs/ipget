@@ -19,11 +19,7 @@ Download a binary for your platform from [IPFS Distributions](https://dist.ipfs.
 ### Install From Source
 
 ```
-$ go get -d github.com/ipfs/ipget
-
-$ cd ${GOPATH}/src/github.com/ipfs/ipget
-
-$ make install
+$ go install github.com/ipfs/ipget@latest
 ```
 
 ### Example
@@ -52,7 +48,7 @@ USAGE:
    ipget [global options] command [command options] [arguments...]
 
 VERSION:
-   0.9.1
+   0.9.2
 
 COMMANDS:
    help, h  Shows a list of commands or help for one command
