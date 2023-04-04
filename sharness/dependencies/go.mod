@@ -92,7 +92,6 @@ require (
 	github.com/ipfs/go-ipfs-ds-help v1.1.0 // indirect
 	github.com/ipfs/go-ipfs-exchange-interface v0.2.0 // indirect
 	github.com/ipfs/go-ipfs-exchange-offline v0.3.0 // indirect
-	github.com/ipfs/go-ipfs-files v0.3.0 // indirect
 	github.com/ipfs/go-ipfs-http-client v0.5.0 // indirect
 	github.com/ipfs/go-ipfs-keystore v0.1.0 // indirect
 	github.com/ipfs/go-ipfs-pinner v0.3.0 // indirect
