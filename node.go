@@ -113,7 +113,7 @@ func tmpNode(ctx context.Context) (iface.CoreAPI, error) {
 	}
 
 	// configure the temporary node
-	cfg.Routing.Type = "dhtclient"
+	cfg.Routing.Type = config.NewOptionalString("dhtclient")
 
 	cfg.Datastore.NoSync = true
 
