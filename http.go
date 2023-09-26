@@ -3,18 +3,18 @@ package main
 import (
 	"context"
 
-	ipfshttp "github.com/ipfs/go-ipfs-http-client"
-	iface "github.com/ipfs/interface-go-ipfs-core"
+	iface "github.com/ipfs/boxo/coreiface"
+	ipfshttp "github.com/ipfs/kubo/client/rpc"
 )
 
 func http(ctx context.Context) (iface.CoreAPI, error) {
-	httpApi, err := ipfshttp.NewLocalApi()
+	httpAPI, err := ipfshttp.NewLocalApi()
 	if err != nil {
 		return nil, err
 	}
-	err = httpApi.Request("version").Exec(ctx, nil)
+	err = httpAPI.Request("version").Exec(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
-	return httpApi, nil
+	return httpAPI, nil
 }

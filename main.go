@@ -14,9 +14,9 @@ import (
 	"syscall"
 
 	"github.com/cheggaaa/pb/v3"
-	files "github.com/ipfs/go-libipfs/files"
-	iface "github.com/ipfs/interface-go-ipfs-core"
-	ipath "github.com/ipfs/interface-go-ipfs-core/path"
+	iface "github.com/ipfs/boxo/coreiface"
+	ipath "github.com/ipfs/boxo/coreiface/path"
+	files "github.com/ipfs/boxo/files"
 	cli "github.com/urfave/cli/v2"
 )
 
