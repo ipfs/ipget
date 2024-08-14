@@ -34,9 +34,9 @@ test_expect_success "retrieve file with mode and mtime" '
 '
 
 test_expect_success "create a test directory" '
-    mkdir test_dir2 &&
-    cp test_file test_dir2/data.txt &&
-    ipfs add --mode=0777 --mtime=660000000 -rQ test_dir2 > dir_hash
+    mkdir test_dir &&
+    cp test_file test_dir/data.txt &&
+    ipfs add --mode=0777 --mtime=660000000 -rQ test_dir > dir_hash
 '
 
 test_expect_success "retrieve a directory with mode and mtime" '
@@ -51,6 +51,43 @@ test_expect_success "retrieve a directory with mode and mtime" '
         stat -f "%m %p" got_dir > out2 &&
         echo "660000000 40777" > expect2 &&
         test_cmp expect2 out2
+        ;;
+    *)
+        echo "unsupported system: $(uname)"
+    esac
+'
+
+test_expect_success "create a test directory with symlink" '
+    case $(uname -s) in
+    Linux|FreeBSD|Darwin)
+        mkdir test_dir2 &&
+        cp test_file test_dir2/data.txt &&
+        ln -s test_file test_dir2/test_file_link &&
+        chmod -h 0777 test_dir2/test_file_link &&
+        touch -h -t 9011301320 test_dir2/test_file_link &&
+        ipfs add --preserve-mode --preserve-mtime -rQ test_dir2 > dir2_hash
+        ;;
+    *)
+        echo "unsupported system: $(uname)"
+    esac
+'
+
+test_expect_success "retrieve a directory with symlink with mode and mtime" '
+    case $(uname -s) in
+    Linux|FreeBSD)
+        ipget --node=local -o got_dir2 "/ipfs/$(<dir2_hash)" &&
+        readlink got_dir2/test_file_link > link_target &&
+        echo "test_file" > expect_target &&
+        test_cmp expect_target link_target &&
+        stat --format="%Y" got_dir2/test_file_link > out3 &&
+        echo "660000000" > expect3 &&
+        test_cmp expect3 out3
+        ;;
+    Darwin)
+        ipget --node=local -o got_dir2 "/ipfs/$(<dir2_hash)" &&
+        readlink got_dir2/test_file_link > link_target &&
+        echo "test_file" > expect_target &&
+        test_cmp expect_target link_target
         ;;
     *)
         echo "unsupported system: $(uname)"
