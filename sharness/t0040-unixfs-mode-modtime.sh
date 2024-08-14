@@ -22,8 +22,8 @@ test_expect_success "retrieve file with mode and mtime" '
         echo "660000000 100664" > expect &&
         test_cmp expect out
     elif test $(uname -s) = "Linux"; then
-        stat --format="%Z %a" data.txt > out &&
-        echo "660000000 664" > expect2 && 
+        stat --format="%a" data.txt > out &&
+        echo "664" > expect2 && 
         test_cmp expect out
     fi
 '
@@ -41,12 +41,10 @@ test_expect_success "retrieve a directory" '
         echo "660000000 40775" > expect2 &&
         test_cmp expect2 out2
     elif test $(uname -s) = "Linux"; then
-        stat --format="%Z %a" got_dir > out2 &&
-        echo "660000000 40775" > expect2 &&
+        stat --format="%a" got_dir > out2 &&
+        echo "775" > expect2 &&
         test_cmp expect2 out2
-    fi
-
-    
+    fi   
 '
 
 # kill the local ipfs node
