@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 
-	iface "github.com/ipfs/boxo/coreiface"
 	ipfshttp "github.com/ipfs/kubo/client/rpc"
+	iface "github.com/ipfs/kubo/core/coreiface"
 )
 
 func http(ctx context.Context) (iface.CoreAPI, error) {
