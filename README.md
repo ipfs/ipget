@@ -48,7 +48,7 @@ USAGE:
    ipget [global options] command [command options] [arguments...]
 
 VERSION:
-   0.9.2
+   see version.json
 
 COMMANDS:
    help, h  Shows a list of commands or help for one command
