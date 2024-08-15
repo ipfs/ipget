@@ -63,9 +63,8 @@ test_expect_success "create a test directory with symlink" '
         mkdir test_dir2 &&
         cp test_file test_dir2/data.txt &&
         ln -s test_file test_dir2/test_file_link &&
-        chmod -h 0777 test_dir2/test_file_link &&
         touch -h -t 9011301320 test_dir2/test_file_link &&
-        ipfs add --preserve-mode --preserve-mtime -rQ test_dir2 > dir2_hash
+        ipfs add --preserve-mtime -rQ test_dir2 > dir2_hash
         ;;
     *)
         echo "unsupported system: $(uname)"
