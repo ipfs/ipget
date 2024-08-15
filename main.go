@@ -171,25 +171,24 @@ func parsePath(path string) (ipath.Path, error) {
 	if err == nil {
 		return ipfsPath, nil
 	}
+	origErr := err
+
+	ipfsPath, err = ipath.NewPath("/ipfs/" + path)
+	if err == nil {
+		return ipfsPath, nil
+	}
 
 	u, err := url.Parse(path)
 	if err != nil {
-		return nil, fmt.Errorf("%q could not be parsed: %s", path, err)
+		return nil, origErr
 	}
-
-	proto := u.Scheme
-	switch proto {
+	switch u.Scheme {
 	case "ipfs", "ipld", "ipns":
-		ipfsPath, err = ipath.NewPath(gopath.Join("/", proto, u.Host, u.Path))
+		return ipath.NewPath(gopath.Join("/", u.Scheme, u.Host, u.Path))
 	case "http", "https":
-		ipfsPath, err = ipath.NewPath(u.Path)
-	default:
-		return nil, fmt.Errorf("%q is not recognized as an IPFS path", path)
+		return ipath.NewPath(u.Path)
 	}
-	if err != nil {
-		return nil, fmt.Errorf("cannot create %s path: %w", proto, err)
-	}
-	return ipfsPath, nil
+	return nil, fmt.Errorf("%q is not recognized as an IPFS path", path)
 }
 
 // WriteTo writes the given node to the local filesystem at fpath.

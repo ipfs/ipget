@@ -15,12 +15,12 @@ test_expect_success "create a test file" '
 	cat hash
 '
 test_expect_success "retrieve a single file" '
-    ipget --node=local "/ipfs/$(<hash)" &&
+    ipget --node=local "$(<hash)" &&
     test_cmp test_file "$(<hash)"
 '
 
 test_expect_success "retrieve a single file with -o" '
-    ipget -o data.txt --node=local "/ipfs/$(<hash)" &&
+    ipget -o data.txt --node=local "$(<hash)" &&
     test_cmp test_file "data.txt"
 '
 
@@ -31,7 +31,7 @@ test_expect_success "create a test directory" '
 '
 
 test_expect_success "retrieve a directory" '
-    ipget --node=local -o got_dir "/ipfs/$(<dir_hash)" &&
+    ipget --node=local -o got_dir "$(<dir_hash)" &&
 	diff -ru test_dir got_dir
 '
 
