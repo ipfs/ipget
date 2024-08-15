@@ -15,9 +15,11 @@ var version = buildVersion()
 
 func buildVersion() string {
 	// Read version from embedded JSON file.
-	var verMap map[string]string
-	json.Unmarshal(versionJSON, &verMap)
-	release := verMap["version"]
+	var v struct {
+		Version string `json:"version"`
+	}
+	json.Unmarshal(versionJSON, &v)
+	release := v.Version
 
 	info, ok := debug.ReadBuildInfo()
 	if !ok {
