@@ -45,12 +45,18 @@ test_expect_success "retrieve a directory with mode and mtime" '
     Linux|FreeBSD)
         stat --format="%Y %a" got_dir > out2 &&
         echo "660000000 777" > expect2 &&
-        test_cmp expect2 out2
+        test_cmp expect2 out2 &&
+        stat --format="%Y %a" got_dir/data.txt > out3 &&
+        echo "660000000 100777" > expect3 &&
+        test_cmp expect3 out3
         ;;
     Darwin)
         stat -f "%m %p" got_dir > out2 &&
         echo "660000000 40777" > expect2 &&
-        test_cmp expect2 out2
+        test_cmp expect2 out2 &&
+        stat -f "%m %p" got_dir/data.txt > out3 &&
+        echo "660000000 100777" > expect3 &&
+        test_cmp expect3 out3
         ;;
     *)
         echo "unsupported system: $(uname)"
@@ -78,9 +84,9 @@ test_expect_success "retrieve a directory with symlink with mode and mtime" '
         readlink got_dir2/test_file_link > link_target &&
         echo "test_file" > expect_target &&
         test_cmp expect_target link_target &&
-        stat --format="%Y" got_dir2/test_file_link > out3 &&
-        echo "660000000" > expect3 &&
-        test_cmp expect3 out3
+        stat --format="%Y" got_dir2/test_file_link > out4 &&
+        echo "660000000" > expect4 &&
+        test_cmp expect4 out4
         ;;
     Darwin)
         ipget --node=local -o got_dir2 "/ipfs/$(<dir2_hash)" &&
