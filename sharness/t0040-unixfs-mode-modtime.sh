@@ -18,12 +18,12 @@ test_expect_success "retrieve file with mode and mtime" '
     ipget -o data.txt --node=local "/ipfs/$(<hash)" &&
     test_cmp test_file "data.txt" &&
     case $(uname -s) in
-    Linux|FreeBSD)
+    Linux)
         stat --format="%Y %a" data.txt > out &&
         echo "660000000 666" > expect && 
         test_cmp expect out
         ;;
-    Darwin)
+    Darwin|FreeBSD)
         stat -f "%m %p" data.txt > out &&
         echo "660000000 100666" > expect &&
         test_cmp expect out
@@ -42,15 +42,15 @@ test_expect_success "create a test directory" '
 test_expect_success "retrieve a directory with mode and mtime" '
     ipget --node=local -o got_dir "/ipfs/$(<dir_hash)" &&
     case $(uname -s) in
-    Linux|FreeBSD)
+    Linux)
         stat --format="%Y %a" got_dir > out2 &&
         echo "660000000 777" > expect2 &&
         test_cmp expect2 out2 &&
         stat --format="%Y %a" got_dir/data.txt > out3 &&
-        echo "660000000 100777" > expect3 &&
+        echo "660000000 777" > expect3 &&
         test_cmp expect3 out3
         ;;
-    Darwin)
+    Darwin|FreeBSD)
         stat -f "%m %p" got_dir > out2 &&
         echo "660000000 40777" > expect2 &&
         test_cmp expect2 out2 &&
@@ -69,8 +69,7 @@ test_expect_success "create a test directory with symlink" '
         mkdir test_dir2 &&
         cp test_file test_dir2/data.txt &&
         ln -s test_file test_dir2/test_file_link &&
-        touch -h -t 9011301320 test_dir2/test_file_link &&
-        ipfs add --preserve-mtime -rQ test_dir2 > dir2_hash
+        ipfs add --mtime=660000000 -rQ test_dir2 > dir2_hash
         ;;
     *)
         echo "unsupported system: $(uname)"
@@ -79,7 +78,7 @@ test_expect_success "create a test directory with symlink" '
 
 test_expect_success "retrieve a directory with symlink with mode and mtime" '
     case $(uname -s) in
-    Linux|FreeBSD)
+    Linux)
         ipget --node=local -o got_dir2 "/ipfs/$(<dir2_hash)" &&
         readlink got_dir2/test_file_link > link_target &&
         echo "test_file" > expect_target &&
@@ -88,7 +87,7 @@ test_expect_success "retrieve a directory with symlink with mode and mtime" '
         echo "660000000" > expect4 &&
         test_cmp expect4 out4
         ;;
-    Darwin)
+    Darwin|FreeBSD)
         ipget --node=local -o got_dir2 "/ipfs/$(<dir2_hash)" &&
         readlink got_dir2/test_file_link > link_target &&
         echo "test_file" > expect_target &&
