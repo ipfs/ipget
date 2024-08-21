@@ -8,9 +8,9 @@ test_description="test the ipget command using a local node"
 # start the local ipfs node
 test_init_ipfs
 
-# We can't use the trash dir as the full name must be longer less than 108 bytes
-# long (because that's the max unix domain socket path length).
-SOCKDIR="$(mktemp -d "${TMPDIR:-/tmp}ipget-sharness.XXXXXX")"
+# We can't use the trash dir as the full name must be longer less than 108
+# bytes long (because that's the max unix domain socket path length).
+SOCKDIR="$(mktemp -d "${TMPDIR:-/tmp}/ipget-sharness.XXXXXX")"
 SOCKPATH="${SOCKDIR}/sock"
 SOCKADDR="/unix/${SOCKPATH}"
 
