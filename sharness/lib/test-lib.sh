@@ -350,14 +350,14 @@ test_launch_ipfs_daemon_unixsocket() {
 
   # we say the daemon is ready when the API server is ready.
   test_expect_success "'ipfs daemon' is ready" '
-    wait_file "$uds" > uds_poll_out
+    wait_unix_socket "$uds" > uds_poll_out
   '
 }
 
-wait_file () {
+wait_unix_socket () {
     udsname="$1"
     n=0
-    until [ "$n" -ge 55 ]; do
+    until [ "$n" -ge 10 ]; do
         sleep 1
         echo "checking for $udsname: n = $n"
         if [ -S "$udsname" ]; then
