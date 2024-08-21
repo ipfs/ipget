@@ -12,7 +12,7 @@ test_init_ipfs
 # long (because that's the max unix domain socket path length).
 SOCKDIR="$(mktemp -d "${TMPDIR:-/tmp}ipget-sharness.XXXXXX")"
 SOCKPATH="${SOCKDIR}/sock"
-SOCKADDR="/unix${SOCKPATH}"
+SOCKADDR="/unix/${SOCKPATH}"
 
 test_expect_success "configure with unix socket" '
     ipfs config Addresses.API "$SOCKADDR"
