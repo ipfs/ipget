@@ -4,8 +4,8 @@ go 1.22
 
 require (
 	github.com/cheggaaa/pb/v3 v3.1.4
-	github.com/ipfs/boxo v0.22.1-0.20240820234446-aa27cd2f8053
-	github.com/ipfs/kubo v0.29.1-0.20240821000246-263edb251eec
+	github.com/ipfs/boxo v0.22.1-0.20240821001902-3cd3857b046c
+	github.com/ipfs/kubo v0.29.1-0.20240821234859-f6fb36cf4358
 	github.com/libp2p/go-libp2p v0.36.2
 	github.com/multiformats/go-multiaddr v0.13.0
 	github.com/urfave/cli/v2 v2.25.7
@@ -77,7 +77,7 @@ require (
 	github.com/ipfs/go-ds-measure v0.2.0 // indirect
 	github.com/ipfs/go-fs-lock v0.0.7 // indirect
 	github.com/ipfs/go-ipfs-blockstore v1.3.1 // indirect
-	github.com/ipfs/go-ipfs-cmds v0.11.0 // indirect
+	github.com/ipfs/go-ipfs-cmds v0.12.0 // indirect
 	github.com/ipfs/go-ipfs-delay v0.0.1 // indirect
 	github.com/ipfs/go-ipfs-ds-help v1.1.1 // indirect
 	github.com/ipfs/go-ipfs-exchange-interface v0.2.1 // indirect
@@ -110,7 +110,7 @@ require (
 	github.com/libp2p/go-doh-resolver v0.4.0 // indirect
 	github.com/libp2p/go-flow-metrics v0.1.0 // indirect
 	github.com/libp2p/go-libp2p-asn-util v0.4.1 // indirect
-	github.com/libp2p/go-libp2p-kad-dht v0.25.2 // indirect
+	github.com/libp2p/go-libp2p-kad-dht v0.26.1 // indirect
 	github.com/libp2p/go-libp2p-kbucket v0.6.3 // indirect
 	github.com/libp2p/go-libp2p-pubsub v0.11.0 // indirect
 	github.com/libp2p/go-libp2p-pubsub-router v0.6.0 // indirect
@@ -216,7 +216,7 @@ require (
 	golang.org/x/mod v0.19.0 // indirect
 	golang.org/x/net v0.27.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.22.0 // indirect
+	golang.org/x/sys v0.24.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/tools v0.23.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240716161551-93cc26a95ae9 // indirect

@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/chriscool/go-sleep v0.0.0-20150606204034-743ab5f1bb48
 	github.com/ipfs/ipget v0.9.2
-	github.com/ipfs/kubo v0.29.1-0.20240821000246-263edb251eec
+	github.com/ipfs/kubo v0.29.1-0.20240821234859-f6fb36cf4358
 	github.com/whyrusleeping/pollEndpoint v0.0.0-20211207235059-e4819e26509a
 )
 
@@ -72,7 +72,7 @@ require (
 	github.com/ipfs-shipyard/nopfs v0.0.12 // indirect
 	github.com/ipfs-shipyard/nopfs/ipfs v0.13.2-0.20231027223058-cde3b5ba964c // indirect
 	github.com/ipfs/bbloom v0.0.4 // indirect
-	github.com/ipfs/boxo v0.22.1-0.20240820234446-aa27cd2f8053 // indirect
+	github.com/ipfs/boxo v0.22.1-0.20240821001902-3cd3857b046c // indirect
 	github.com/ipfs/go-bitfield v1.1.0 // indirect
 	github.com/ipfs/go-block-format v0.2.0 // indirect
 	github.com/ipfs/go-blockservice v0.5.2 // indirect
@@ -85,7 +85,7 @@ require (
 	github.com/ipfs/go-ds-measure v0.2.0 // indirect
 	github.com/ipfs/go-fs-lock v0.0.7 // indirect
 	github.com/ipfs/go-ipfs-blockstore v1.3.1 // indirect
-	github.com/ipfs/go-ipfs-cmds v0.11.0 // indirect
+	github.com/ipfs/go-ipfs-cmds v0.12.0 // indirect
 	github.com/ipfs/go-ipfs-delay v0.0.1 // indirect
 	github.com/ipfs/go-ipfs-ds-help v1.1.1 // indirect
 	github.com/ipfs/go-ipfs-exchange-interface v0.2.1 // indirect
@@ -122,7 +122,7 @@ require (
 	github.com/libp2p/go-libp2p-asn-util v0.4.1 // indirect
 	github.com/libp2p/go-libp2p-gostream v0.6.0 // indirect
 	github.com/libp2p/go-libp2p-http v0.5.0 // indirect
-	github.com/libp2p/go-libp2p-kad-dht v0.25.2 // indirect
+	github.com/libp2p/go-libp2p-kad-dht v0.26.1 // indirect
 	github.com/libp2p/go-libp2p-kbucket v0.6.3 // indirect
 	github.com/libp2p/go-libp2p-pubsub v0.11.0 // indirect
 	github.com/libp2p/go-libp2p-pubsub-router v0.6.0 // indirect
@@ -241,8 +241,8 @@ require (
 	golang.org/x/net v0.27.0 // indirect
 	golang.org/x/oauth2 v0.21.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.22.0 // indirect
-	golang.org/x/term v0.22.0 // indirect
+	golang.org/x/sys v0.24.0 // indirect
+	golang.org/x/term v0.23.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/tools v0.23.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240716161551-93cc26a95ae9 // indirect
