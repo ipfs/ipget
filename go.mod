@@ -1,12 +1,14 @@
 module github.com/ipfs/ipget
 
-go 1.22
+go 1.23
+
+toolchain go1.23.0
 
 require (
 	github.com/cheggaaa/pb/v3 v3.1.4
-	github.com/ipfs/boxo v0.22.1-0.20240821001902-3cd3857b046c
-	github.com/ipfs/kubo v0.29.1-0.20240821234859-f6fb36cf4358
-	github.com/libp2p/go-libp2p v0.36.2
+	github.com/ipfs/boxo v0.23.0
+	github.com/ipfs/kubo v0.30.0-rc3
+	github.com/libp2p/go-libp2p v0.36.3
 	github.com/multiformats/go-multiaddr v0.13.0
 	github.com/urfave/cli/v2 v2.25.7
 )
@@ -77,7 +79,7 @@ require (
 	github.com/ipfs/go-ds-measure v0.2.0 // indirect
 	github.com/ipfs/go-fs-lock v0.0.7 // indirect
 	github.com/ipfs/go-ipfs-blockstore v1.3.1 // indirect
-	github.com/ipfs/go-ipfs-cmds v0.12.0 // indirect
+	github.com/ipfs/go-ipfs-cmds v0.13.0 // indirect
 	github.com/ipfs/go-ipfs-delay v0.0.1 // indirect
 	github.com/ipfs/go-ipfs-ds-help v1.1.1 // indirect
 	github.com/ipfs/go-ipfs-exchange-interface v0.2.1 // indirect
@@ -93,7 +95,7 @@ require (
 	github.com/ipfs/go-merkledag v0.11.0 // indirect
 	github.com/ipfs/go-metrics-interface v0.0.1 // indirect
 	github.com/ipfs/go-peertaskqueue v0.8.1 // indirect
-	github.com/ipfs/go-unixfsnode v1.9.0 // indirect
+	github.com/ipfs/go-unixfsnode v1.9.1 // indirect
 	github.com/ipfs/go-verifcid v0.0.3 // indirect
 	github.com/ipld/go-car v0.6.2 // indirect
 	github.com/ipld/go-car/v2 v2.13.1 // indirect
