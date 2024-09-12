@@ -320,6 +320,56 @@ test_launch_ipfs_daemon() {
   '
 }
 
+# Wait for unix socket to appear. Unix socket path much be first argument.
+test_launch_ipfs_daemon_unixsocket() {
+
+  uds="$1"
+  if [ -z "$uds" ]; then
+    echo "Unix domain socket path not specified"
+    return 1
+  fi
+  shift
+    
+  args=("$@")
+
+  test "$TEST_ULIMIT_PRESET" != 1 && ulimit -n 2048
+
+  test_expect_success "'ipfs daemon' succeeds" '
+    ipfs daemon "${args[@]}" >actual_daemon 2>daemon_err &
+    IPFS_PID=$!
+
+    echo "IPFS PID: $IPFS_PID"
+  '
+
+  # wait for api file to show up
+  test_expect_success "api file shows up" '
+    test_wait_for_file 50 1000ms "$IPFS_PATH/api"
+  '
+
+  test_set_address_vars actual_daemon
+
+  # we say the daemon is ready when the API server is ready.
+  test_expect_success "'ipfs daemon' is ready" '
+    wait_unix_socket "$uds" > uds_poll_out
+  '
+}
+
+wait_unix_socket () {
+    udsname="$1"
+    n=0
+    until [ "$n" -ge 10 ]; do
+        sleep 1
+        echo "checking for $udsname: n = $n"
+        if [ -S "$udsname" ]; then
+            echo "daemon ready on socket $udsname"
+            return 0
+        fi
+        n=$((n+1))
+    done
+    echo "timed out waiting for $udsname"
+    return 1
+}
+
 do_umount() {
   if [ "$(uname -s)" = "Linux" ]; then
   fusermount -u "$1"

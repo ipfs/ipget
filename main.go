@@ -9,14 +9,15 @@ import (
 	"os/signal"
 	gopath "path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"syscall"
 
 	"github.com/cheggaaa/pb/v3"
-	iface "github.com/ipfs/boxo/coreiface"
-	ipath "github.com/ipfs/boxo/coreiface/path"
 	files "github.com/ipfs/boxo/files"
+	ipath "github.com/ipfs/boxo/path"
+	iface "github.com/ipfs/kubo/core/coreiface"
 	cli "github.com/urfave/cli/v2"
 )
 
@@ -166,25 +167,28 @@ func movePostfixOptions(args []string) []string {
 }
 
 func parsePath(path string) (ipath.Path, error) {
-	ipfsPath := ipath.New(path)
-	if ipfsPath.IsValid() == nil {
+	ipfsPath, err := ipath.NewPath(path)
+	if err == nil {
+		return ipfsPath, nil
+	}
+	origErr := err
+
+	ipfsPath, err = ipath.NewPath("/ipfs/" + path)
+	if err == nil {
 		return ipfsPath, nil
 	}
 
 	u, err := url.Parse(path)
 	if err != nil {
-		return nil, fmt.Errorf("%q could not be parsed: %s", path, err)
+		return nil, origErr
 	}
-
-	switch proto := u.Scheme; proto {
+	switch u.Scheme {
 	case "ipfs", "ipld", "ipns":
-		ipfsPath = ipath.New(gopath.Join("/", proto, u.Host, u.Path))
+		return ipath.NewPath(gopath.Join("/", u.Scheme, u.Host, u.Path))
 	case "http", "https":
-		ipfsPath = ipath.New(u.Path)
-	default:
-		return nil, fmt.Errorf("%q is not recognized as an IPFS path", path)
+		return ipath.NewPath(u.Path)
 	}
-	return ipfsPath, ipfsPath.IsValid()
+	return nil, fmt.Errorf("%q is not recognized as an IPFS path", path)
 }
 
 // WriteTo writes the given node to the local filesystem at fpath.
@@ -205,7 +209,16 @@ func WriteTo(nd files.Node, fpath string, progress bool) error {
 func writeToRec(nd files.Node, fpath string, bar *pb.ProgressBar) error {
 	switch nd := nd.(type) {
 	case *files.Symlink:
-		return os.Symlink(nd.Target, fpath)
+		err := os.Symlink(nd.Target, fpath)
+		if err != nil {
+			return err
+		}
+		switch runtime.GOOS {
+		case "linux", "freebsd", "netbsd", "openbsd", "dragonfly":
+			return files.UpdateModTime(fpath, nd.ModTime())
+		default:
+			return nil
+		}
 	case files.File:
 		f, err := os.Create(fpath)
 		defer f.Close()
@@ -221,13 +234,12 @@ func writeToRec(nd files.Node, fpath string, bar *pb.ProgressBar) error {
 		if err != nil {
 			return err
 		}
-		return nil
+		return files.UpdateMeta(fpath, nd.Mode(), nd.ModTime())
 	case files.Directory:
 		err := os.Mkdir(fpath, 0777)
 		if err != nil {
 			return err
 		}
-
 		entries := nd.Entries()
 		for entries.Next() {
 			child := filepath.Join(fpath, entries.Name())
@@ -235,6 +247,11 @@ func writeToRec(nd files.Node, fpath string, bar *pb.ProgressBar) error {
 				return err
 			}
 		}
+
+		if err = files.UpdateMeta(fpath, nd.Mode(), nd.ModTime()); err != nil {
+			return err
+		}
+
 		return entries.Err()
 	default:
 		return fmt.Errorf("file type %T at %q is not supported", nd, fpath)
