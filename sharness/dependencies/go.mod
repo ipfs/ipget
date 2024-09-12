@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/chriscool/go-sleep v0.0.0-20150606204034-743ab5f1bb48
 	github.com/ipfs/ipget v0.9.2
-	github.com/ipfs/kubo v0.30.0-rc3
+	github.com/ipfs/kubo v0.30.0
 	github.com/whyrusleeping/pollEndpoint v0.0.0-20211207235059-e4819e26509a
 )
 
