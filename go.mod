@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/cheggaaa/pb/v3 v3.1.4
 	github.com/ipfs/boxo v0.23.0
-	github.com/ipfs/kubo v0.30.0-rc3
+	github.com/ipfs/kubo v0.30.0
 	github.com/libp2p/go-libp2p v0.36.3
 	github.com/multiformats/go-multiaddr v0.13.0
 	github.com/urfave/cli/v2 v2.27.4
