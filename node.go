@@ -31,11 +31,11 @@ func spawn(ctx context.Context) (iface.CoreAPI, error) {
 	}
 
 	ipfs, err := open(ctx, defaultPath)
-	if err == nil {
-		return ipfs, nil
+	if err != nil {
+		return tmpNode(ctx)
 	}
 
-	return tmpNode(ctx)
+	return ipfs, nil
 }
 
 func setupPlugins(path string) error {
