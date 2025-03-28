@@ -2,8 +2,6 @@ module github.com/ipfs/ipget
 
 go 1.23
 
-toolchain go1.23.2
-
 require (
 	github.com/cheggaaa/pb/v3 v3.1.4
 	github.com/ipfs/boxo v0.24.3
@@ -62,7 +60,7 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang/glog v1.2.2 // indirect
+	github.com/golang/glog v1.2.4 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/gopacket v1.1.19 // indirect
