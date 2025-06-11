@@ -35,6 +35,7 @@ func main() {
 	app.Name = "ipget"
 	app.Usage = "Retrieve and save IPFS objects."
 	app.Version = version
+	app.UsageText = "ipget [options] ipfs_object [ipfs_object ...]"
 	app.Flags = []cli.Flag{
 		&cli.StringFlag{
 			Name:    "output",
@@ -45,10 +46,10 @@ func main() {
 			Name:    "node",
 			Aliases: []string{"n"},
 			Usage: "specify ipfs node strategy (\"local\", \"spawn\", \"temp\" or \"fallback\")" +
-				"\nlocal    connects to a local IPFS daemon" +
-				"\nspawn    runs ipget as an IPFS node using an existing repo, uses 'temo' strategy if no repo" +
-				"\ntemp     runs ipget as an IPFS node using a temporary repo that is removed on command completion" +
-				"\nfallback tries 'local' first and then 'spawn' if no local daemon available.",
+				"\nlocal    connect to a local IPFS daemon" +
+				"\nspawn    run ipget as an IPFS node using an existing repo, use 'temp' strategy if no repo" +
+				"\ntemp     run ipget as an IPFS node using a temporary repo that is removed on command completion" +
+				"\nfallback tries 'local' strategy first and then 'spawn' if no local daemon is available",
 			Value: "fallback",
 		},
 		&cli.StringSliceFlag{
