@@ -7,7 +7,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ "ubuntu", "macos" ]
-        go: [ "1.23.x" ]
+        go: [ "1.24.x" ]
     runs-on: ${{ matrix.os }}-latest
     name: Sharness (${{ matrix.os }} / go-${{ matrix.go }})
     steps:
