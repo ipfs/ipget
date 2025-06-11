@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -43,8 +44,12 @@ func main() {
 		&cli.StringFlag{
 			Name:    "node",
 			Aliases: []string{"n"},
-			Usage:   "specify ipfs node strategy (\"local\", \"spawn\", \"temp\" or \"fallback\")",
-			Value:   "fallback",
+			Usage: "specify ipfs node strategy (\"local\", \"spawn\", \"temp\" or \"fallback\")" +
+				"\nlocal    connects to a local IPFS daemon" +
+				"\nspawn    runs ipget as an IPFS node using an existing repo, uses 'temo' strategy if no repo" +
+				"\ntemp     runs ipget as an IPFS node using a temporary repo that is removed on command completion" +
+				"\nfallback tries 'local' first and then 'spawn' if no local daemon available.",
+			Value: "fallback",
 		},
 		&cli.StringSliceFlag{
 			Name:    "peers",
@@ -59,7 +64,18 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	sigExitCoder := make(chan cli.ExitCoder, 1)
+
+	// Catch interrupt signal
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-sigs
+		fmt.Fprintln(os.Stderr, "Received interrupt signal, shutting down...")
+		cancel()
+	}()
+
+	// cli library requires flags before arguments
+	args := movePostfixOptions(os.Args)
 
 	app.Action = func(c *cli.Context) error {
 		if !c.Args().Present() {
@@ -83,10 +99,9 @@ func main() {
 		switch c.String("node") {
 		case "fallback":
 			ipfs, err = http(ctx)
-			if err == nil {
-				break
+			if err != nil {
+				ipfs, err = spawn(ctx)
 			}
-			fallthrough
 		case "spawn":
 			ipfs, err = spawn(ctx)
 		case "local":
@@ -104,37 +119,22 @@ func main() {
 
 		out, err := ipfs.Unixfs().Get(ctx, iPath)
 		if err != nil {
-			if err == context.Canceled {
-				return <-sigExitCoder
-			}
-			return cli.Exit(err, 2)
+			return err
 		}
-		err = WriteTo(out, outPath, c.Bool("progress"))
-		if err != nil {
-			if err == context.Canceled {
-				return <-sigExitCoder
-			}
-			return cli.Exit(err, 2)
+		if err = WriteTo(out, outPath, c.Bool("progress")); err != nil {
+			return err
 		}
 		return nil
 	}
 
-	// Catch interrupt signal
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		sig := <-sigs
-		sigExitCoder <- cli.Exit("", 128+int(sig.(syscall.Signal)))
-		cancel()
-	}()
-
-	// cli library requires flags before arguments
-	args := movePostfixOptions(os.Args)
-
 	err := app.Run(args)
+	doCleanup()
+
 	if err != nil {
+		if errors.Is(err, context.Canceled) {
+			os.Exit(2)
+		}
 		fmt.Fprintln(os.Stderr, err)
-		doCleanup()
 		os.Exit(1)
 	}
 }
