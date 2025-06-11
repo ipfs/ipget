@@ -21,9 +21,9 @@ jobs:
         uses: ./.github/actions/go-check-setup
         if: hashFiles('./.github/actions/go-check-setup') != ''
       - name: Install staticcheck
-        run: go install honnef.co/go/tools/cmd/staticcheck@56172d41b117cc2c2f99f65fe0a790c8d7d7ea66 # 2024.1.1 (v0.5.1)
+        run: go install honnef.co/go/tools/cmd/staticcheck@b8ec13ce4d00445d75da053c47498e6f9ec5d7d6 # 2025.1.1 (v0.6.1)
       - name: Check that go.mod is tidy
-        uses: protocol/multiple-go-modules@v1.2
+        uses: protocol/multiple-go-modules@v1.4
         with:
           run: |
             go mod tidy
@@ -42,18 +42,18 @@ jobs:
           fi
       - name: go vet
         if: success() || failure() # run this step even if the previous one failed
-        uses: protocol/multiple-go-modules@v1.2
+        uses: protocol/multiple-go-modules@v1.4
         with:
           run: go vet ./...
       - name: staticcheck
         if: success() || failure() # run this step even if the previous one failed
-        uses: protocol/multiple-go-modules@v1.2
+        uses: protocol/multiple-go-modules@v1.4
         with:
           run: |
             set -o pipefail
             staticcheck ./... | sed -e 's@\(.*\)\.go@./\1.go@g'
       - name: go generate
-        uses: protocol/multiple-go-modules@v1.2
+        uses: protocol/multiple-go-modules@v1.4
         if: (success() || failure()) && fromJSON(steps.config.outputs.json).gogenerate == true
         with:
           run: |
