@@ -19,7 +19,7 @@ import (
 	files "github.com/ipfs/boxo/files"
 	ipath "github.com/ipfs/boxo/path"
 	iface "github.com/ipfs/kubo/core/coreiface"
-	cli "github.com/urfave/cli/v2"
+	cli "github.com/urfave/cli/v3"
 )
 
 var (
@@ -31,36 +31,38 @@ func main() {
 	// Do any cleanup on exit
 	defer doCleanup()
 
-	app := cli.NewApp()
-	app.Name = "ipget"
-	app.Usage = "Retrieve and save IPFS objects."
-	app.Version = version
-	app.UsageText = "ipget [options] ipfs_object [ipfs_object ...]"
-	app.Flags = []cli.Flag{
-		&cli.StringFlag{
-			Name:    "output",
-			Aliases: []string{"o"},
-			Usage:   "specify output location",
+	cmd := &cli.Command{
+		Name:      "ipget",
+		Usage:     "Retrieve and save IPFS objects.",
+		Version:   version,
+		UsageText: "ipget [options] ipfs_object [ipfs_object ...]",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "output",
+				Aliases: []string{"o"},
+				Usage:   "specify output location",
+			},
+			&cli.StringFlag{
+				Name:    "node",
+				Aliases: []string{"n"},
+				Usage: "specify ipfs node strategy (\"local\", \"spawn\", \"temp\" or \"fallback\")" +
+					"\nlocal    connect to a local IPFS daemon" +
+					"\nspawn    run ipget as an IPFS node using an existing repo, use 'temp' strategy if no repo" +
+					"\ntemp     run ipget as an IPFS node using a temporary repo that is removed on command completion" +
+					"\nfallback tries 'local' strategy first and then 'spawn' if no local daemon is available",
+				Value: "fallback",
+			},
+			&cli.StringSliceFlag{
+				Name:    "peers",
+				Aliases: []string{"p"},
+				Usage:   "specify a set of IPFS peers to connect to",
+			},
+			&cli.BoolFlag{
+				Name:  "progress",
+				Usage: "show a progress bar",
+			},
 		},
-		&cli.StringFlag{
-			Name:    "node",
-			Aliases: []string{"n"},
-			Usage: "specify ipfs node strategy (\"local\", \"spawn\", \"temp\" or \"fallback\")" +
-				"\nlocal    connect to a local IPFS daemon" +
-				"\nspawn    run ipget as an IPFS node using an existing repo, use 'temp' strategy if no repo" +
-				"\ntemp     run ipget as an IPFS node using a temporary repo that is removed on command completion" +
-				"\nfallback tries 'local' strategy first and then 'spawn' if no local daemon is available",
-			Value: "fallback",
-		},
-		&cli.StringSliceFlag{
-			Name:    "peers",
-			Aliases: []string{"p"},
-			Usage:   "specify a set of IPFS peers to connect to",
-		},
-		&cli.BoolFlag{
-			Name:  "progress",
-			Usage: "show a progress bar",
-		},
+		Action: ipgetAction,
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -76,59 +78,7 @@ func main() {
 	}()
 
 	// cli library requires flags before arguments
-	args := movePostfixOptions(os.Args)
-
-	app.Action = func(c *cli.Context) error {
-		if !c.Args().Present() {
-			return fmt.Errorf("usage: ipget <ipfs ref>")
-		}
-
-		outPath := c.String("output")
-		iPath, err := parsePath(c.Args().First())
-		if err != nil {
-			return err
-		}
-
-		// Use the final segment of the object's path if no path was given.
-		if outPath == "" {
-			trimmed := strings.TrimRight(iPath.String(), "/")
-			_, outPath = filepath.Split(trimmed)
-			outPath = filepath.Clean(outPath)
-		}
-
-		var ipfs iface.CoreAPI
-		switch c.String("node") {
-		case "fallback":
-			ipfs, err = http(ctx)
-			if err != nil {
-				ipfs, err = spawn(ctx)
-			}
-		case "spawn":
-			ipfs, err = spawn(ctx)
-		case "local":
-			ipfs, err = http(ctx)
-		case "temp":
-			ipfs, err = temp(ctx)
-		default:
-			return fmt.Errorf("no such 'node' strategy, %q", c.String("node"))
-		}
-		if err != nil {
-			return err
-		}
-
-		go connect(ctx, ipfs, c.StringSlice("peers"))
-
-		out, err := ipfs.Unixfs().Get(ctx, iPath)
-		if err != nil {
-			return err
-		}
-		if err = WriteTo(out, outPath, c.Bool("progress")); err != nil {
-			return err
-		}
-		return nil
-	}
-
-	err := app.Run(args)
+	err := cmd.Run(ctx, movePostfixOptions(os.Args))
 	doCleanup()
 
 	if err != nil {
@@ -138,6 +88,56 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
+
+func ipgetAction(ctx context.Context, cmd *cli.Command) error {
+	if !cmd.Args().Present() {
+		return fmt.Errorf("usage: ipget <ipfs ref>")
+	}
+
+	outPath := cmd.String("output")
+	iPath, err := parsePath(cmd.Args().First())
+	if err != nil {
+		return err
+	}
+
+	// Use the final segment of the object's path if no path was given.
+	if outPath == "" {
+		trimmed := strings.TrimRight(iPath.String(), "/")
+		_, outPath = filepath.Split(trimmed)
+		outPath = filepath.Clean(outPath)
+	}
+
+	var ipfs iface.CoreAPI
+	switch cmd.String("node") {
+	case "fallback":
+		ipfs, err = http(ctx)
+		if err != nil {
+			ipfs, err = spawn(ctx)
+		}
+	case "spawn":
+		ipfs, err = spawn(ctx)
+	case "local":
+		ipfs, err = http(ctx)
+	case "temp":
+		ipfs, err = temp(ctx)
+	default:
+		return fmt.Errorf("no such 'node' strategy, %q", cmd.String("node"))
+	}
+	if err != nil {
+		return err
+	}
+
+	go connect(ctx, ipfs, cmd.StringSlice("peers"))
+
+	out, err := ipfs.Unixfs().Get(ctx, iPath)
+	if err != nil {
+		return err
+	}
+	if err = WriteTo(out, outPath, cmd.Bool("progress")); err != nil {
+		return err
+	}
+	return nil
 }
 
 // movePostfixOptions moves non-flag arguments to end of argument list.
