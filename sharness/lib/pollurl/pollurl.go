@@ -3,13 +3,13 @@
 //
 // Run pollurl as a cli script:
 //
-//	go run pollurl [args...]
+//	go run pollurl.go [args...]
 package main
 
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -67,13 +67,13 @@ func main() {
 			*tries--
 		} else {
 			if *verbose {
-				log.Printf("ok -  endpoint reachable with %d tries remaining, took %s", *tries, time.Since(start))
+				log.Printf("ok - endpoint reachable with %d tries remaining, took %s", *tries, time.Since(start))
 			}
 			os.Exit(0)
 		}
 	}
 
-	log.Print("failed.")
+	log.Print("failed")
 	os.Exit(1)
 }
 
@@ -84,11 +84,11 @@ func checkOK(endpoint string) error {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "pollurl: error reading response body: %s", err)
 		}
-		return fmt.Errorf("Response not OK. %d %s %q", resp.StatusCode, resp.Status, string(body))
+		return fmt.Errorf("response not OK. %d %s %q", resp.StatusCode, resp.Status, string(body))
 	}
 	return nil
 }
