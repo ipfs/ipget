@@ -3,9 +3,7 @@
 package tools
 
 import (
-	_ "github.com/chriscool/go-sleep"
 	_ "github.com/ipfs/kubo/cmd/ipfs"
-	_ "github.com/whyrusleeping/pollEndpoint"
 
 	// We depend on ipget, then use a ../../ replace directive to ensure we end up using the
 	// _same_ version of go-ipfs. If we update any dependencies in the main module, `go mod

@@ -17,6 +17,8 @@ PATH=$(pwd)/bin:${PATH}
 test "$TEST_VERBOSE" = 1 && verbose=t
 test "$TEST_IMMEDIATE" = 1 && immediate=t
 
+# Set this before sourcing $SHARNESS_LIB
+LIB_PATH="$(pwd)/lib"
 
 SHARNESS_LIB="lib/sharness/sharness.sh"
 
@@ -159,7 +161,7 @@ test_cmp_repeat_10_sec() {
   for i in $(test_seq 1 100)
   do
     test_cmp "$1" "$2" >/dev/null && return
-    go-sleep 100ms
+    sleep 0.1 # 100ms
   done
   test_cmp "$1" "$2"
 }
@@ -168,7 +170,7 @@ test_run_repeat_60_sec() {
   for i in $(test_seq 1 600)
   do
     (test_eval_ "$1") && return
-    go-sleep 100ms
+    sleep 0.1 # 100ms
   done
   return 1 # failed
 }
@@ -177,7 +179,7 @@ test_wait_output_n_lines_60_sec() {
   for i in $(test_seq 1 600)
   do
     test $(cat "$1" | wc -l | tr -d " ") -ge $2 && return
-    go-sleep 100ms
+    sleep 0.1 # 100ms
   done
   actual=$(cat "$1" | wc -l | tr -d " ")
   test_fsh "expected $2 lines of output. got $actual"
@@ -193,7 +195,7 @@ test_wait_open_tcp_port_10_sec() {
     if [ $(netstat -aln | egrep "^tcp.*LISTEN" | egrep "[.:]$1" | wc -l) -gt 0 ]; then
       return 0
     fi
-    go-sleep 100ms
+    sleep 0.1 # 100ms
   done
   return 1
 }
@@ -263,7 +265,7 @@ test_wait_for_file() {
       return 1
     fi
 
-    go-sleep $delay
+    sleep $delay
     fwaitc=`expr $fwaitc + 1`
   done
 }
@@ -308,14 +310,14 @@ test_launch_ipfs_daemon() {
 
   # wait for api file to show up
   test_expect_success "api file shows up" '
-    test_wait_for_file 50 1000ms "$IPFS_PATH/api"
+    test_wait_for_file 50 1 "$IPFS_PATH/api"
   '
 
   test_set_address_vars actual_daemon
 
   # we say the daemon is ready when the API server is ready.
   test_expect_success "'ipfs daemon' is ready" '
-    pollEndpoint -host=$API_MADDR -v -tout=1s -tries=60 2>poll_apierr > poll_apiout ||
+    go run ${LIB_PATH}/pollurl/pollurl.go -host=$API_MADDR -v -tout=1s -tries=60 2>poll_apierr > poll_apiout ||
     test_fsh cat actual_daemon || test_fsh cat daemon_err || test_fsh cat poll_apierr || test_fsh cat poll_apiout
   '
 }
@@ -343,7 +345,7 @@ test_launch_ipfs_daemon_unixsocket() {
 
   # wait for api file to show up
   test_expect_success "api file shows up" '
-    test_wait_for_file 50 1000ms "$IPFS_PATH/api"
+    test_wait_for_file 50 1 "$IPFS_PATH/api"
   '
 
   test_set_address_vars actual_daemon
@@ -408,13 +410,13 @@ test_kill_repeat_10_sec() {
   kill $1
   for i in $(test_seq 1 100)
   do
-    go-sleep 100ms
+    sleep 0.1 # 100ms
     ! kill -0 $1 2>/dev/null && return
   done
 
   # if not, try once more, which will skip graceful exit
   kill $1
-  go-sleep 1s
+  sleep 1
   ! kill -0 $1 2>/dev/null && return
 
   # ok, no hope. kill it to prevent it messing with other tests

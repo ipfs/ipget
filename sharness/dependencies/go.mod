@@ -3,10 +3,8 @@ module github.com/ipfs/ipget/sharness/dependencies
 go 1.25
 
 require (
-	github.com/chriscool/go-sleep v0.0.0-20150606204034-743ab5f1bb48
 	github.com/ipfs/ipget v0.11.3
 	github.com/ipfs/kubo v0.37.0
-	github.com/whyrusleeping/pollEndpoint v0.0.0-20211207235059-e4819e26509a
 )
 
 require (
@@ -101,7 +99,6 @@ require (
 	github.com/ipfs/go-ipld-format v0.6.2 // indirect
 	github.com/ipfs/go-ipld-git v0.1.1 // indirect
 	github.com/ipfs/go-ipld-legacy v0.2.2 // indirect
-	github.com/ipfs/go-log v1.0.5 // indirect
 	github.com/ipfs/go-log/v2 v2.8.1 // indirect
 	github.com/ipfs/go-metrics-interface v0.3.0 // indirect
 	github.com/ipfs/go-metrics-prometheus v0.1.0 // indirect
