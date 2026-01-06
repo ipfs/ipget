@@ -85,6 +85,9 @@ func main() {
 		if errors.Is(err, context.Canceled) {
 			os.Exit(2)
 		}
+		if errors.Is(err, context.DeadlineExceeded) {
+			err = errors.New("timed out")
+		}
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -113,6 +116,7 @@ func ipgetAction(ctx context.Context, cmd *cli.Command) error {
 	case "fallback":
 		ipfs, err = http(ctx)
 		if err != nil {
+			fmt.Fprintln(os.Stderr, "failed")
 			ipfs, err = spawn(ctx)
 		}
 	case "spawn":
@@ -125,6 +129,7 @@ func ipgetAction(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("no such 'node' strategy, %q", cmd.String("node"))
 	}
 	if err != nil {
+		fmt.Fprintln(os.Stderr, "failed")
 		return err
 	}
 
@@ -132,8 +137,11 @@ func ipgetAction(ctx context.Context, cmd *cli.Command) error {
 
 	out, err := ipfs.Unixfs().Get(ctx, iPath)
 	if err != nil {
+		fmt.Fprintln(os.Stderr, "failed")
 		return err
 	}
+	fmt.Fprintln(os.Stderr, "succeeded")
+
 	if err = WriteTo(out, outPath, cmd.Bool("progress")); err != nil {
 		return err
 	}
@@ -204,7 +212,12 @@ func WriteTo(nd files.Node, fpath string, progress bool) error {
 		bar = pb.New64(s).Start()
 	}
 
-	return writeToRec(nd, fpath, bar)
+	if err = writeToRec(nd, fpath, bar); err != nil {
+		return err
+	}
+
+	fmt.Fprintf(os.Stderr, "Saved to %s [%d bytes]\n", fpath, s)
+	return nil
 }
 
 func writeToRec(nd files.Node, fpath string, bar *pb.ProgressBar) error {
