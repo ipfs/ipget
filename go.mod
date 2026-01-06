@@ -8,7 +8,7 @@ require (
 	github.com/ipfs/kubo v0.39.0
 	github.com/libp2p/go-libp2p v0.46.0
 	github.com/multiformats/go-multiaddr v0.16.1
-	github.com/urfave/cli/v3 v3.5.0
+	github.com/urfave/cli/v3 v3.6.1
 )
 
 require (
