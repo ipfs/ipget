@@ -20,6 +20,8 @@ import (
 type CfgOpt func(*config.Config)
 
 func spawn(ctx context.Context) (iface.CoreAPI, error) {
+	fmt.Fprint(os.Stderr, "Downloading from IPFS node with existing repo... ")
+
 	defaultPath, err := config.PathRoot()
 	if err != nil {
 		// shouldn't be possible
@@ -32,6 +34,7 @@ func spawn(ctx context.Context) (iface.CoreAPI, error) {
 
 	ipfs, err := open(ctx, defaultPath)
 	if err != nil {
+		fmt.Fprintln(os.Stderr, "failed")
 		return tmpNode(ctx)
 	}
 
@@ -91,6 +94,8 @@ func temp(ctx context.Context) (iface.CoreAPI, error) {
 }
 
 func tmpNode(ctx context.Context) (iface.CoreAPI, error) {
+	fmt.Fprint(os.Stderr, "Downloading from IPFS node with temporary repo... ")
+
 	dir, err := os.MkdirTemp("", "ipfs-shell")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get temp dir: %s", err)
