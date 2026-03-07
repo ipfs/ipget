@@ -9,19 +9,19 @@ jobs:
     runs-on: ubuntu-latest
     name: All
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
       - id: config
         uses: protocol/.github/.github/actions/read-config@master
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v5
         with:
-          go-version: "1.25.x"
+          go-version: "1.26.x"
       - name: Run repo-specific setup
         uses: ./.github/actions/go-check-setup
         if: hashFiles('./.github/actions/go-check-setup') != ''
       - name: Install staticcheck
-        run: go install honnef.co/go/tools/cmd/staticcheck@b8ec13ce4d00445d75da053c47498e6f9ec5d7d6 # 2025.1.1 (v0.6.1)
+        run: go install honnef.co/go/tools/cmd/staticcheck@ff63afafc529279f454e02f1d060210bd4263951 # 2026.1 (v0.7.0)
       - name: Check that go.mod is tidy
         uses: protocol/multiple-go-modules@v1.4
         with:

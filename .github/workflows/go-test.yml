@@ -10,18 +10,18 @@ jobs:
       fail-fast: false
       matrix:
         os: [ "ubuntu", "windows", "macos" ]
-        go: [ "1.25.x" ]
+        go: [ "1.26.x" ]
     env:
       COVERAGES: ""
     runs-on: ${{ fromJSON(vars[format('UCI_GO_TEST_RUNNER_{0}', matrix.os)] || format('"{0}-latest"', matrix.os)) }}
     name: ${{ matrix.os }} (go ${{ matrix.go }})
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
       - id: config
         uses: protocol/.github/.github/actions/read-config@master
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
       - name: Go information
