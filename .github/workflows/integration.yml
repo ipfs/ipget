@@ -7,14 +7,14 @@ jobs:
       fail-fast: false
       matrix:
         os: [ "ubuntu", "macos" ]
-        go: [ "1.25.x" ]
+        go: [ "1.26.x" ]
     runs-on: ${{ matrix.os }}-latest
     name: Sharness (${{ matrix.os }} / go-${{ matrix.go }})
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
       - name: Go information
