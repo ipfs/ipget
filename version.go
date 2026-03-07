@@ -47,5 +47,5 @@ func buildVersion() string {
 	if revision != "" {
 		return fmt.Sprintf("%s %s-%s", release, day, revision)
 	}
-	return release + " dev-build"
+	return release
 }
