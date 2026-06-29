@@ -1,0 +1,122 @@
+name: Release Binaries
+
+# Cross-compiles ipget for every published platform and attaches any archive missing from
+# the GitHub Release. It can be dispatched against a tag to backfill, and runs automatically
+# after the Releaser workflow completes (which is how a release is published, from a
+# version.json bump).
+#
+# The auto-trigger is workflow_run, not release:published, on purpose: the unified releaser
+# creates the release with the default GITHUB_TOKEN, and GitHub does not deliver release
+# events for GITHUB_TOKEN-created releases (its recursion guard), so a release:published
+# trigger would never fire. Idempotent: an asset already on the release (including one
+# uploaded by hand) is left untouched, so a re-run only fills gaps.
+
+on:
+  workflow_run:
+    workflows: ["Releaser"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to build and attach binaries for (e.g. v0.13.1)"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.id || inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    # A manual dispatch always proceeds; an automatic run only after a successful Releaser.
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_TAG:-}" ]; then
+            TAG="$INPUT_TAG"
+          else
+            # The Releaser just published the newest release; attach binaries to it.
+            TAG="$(gh release view --json tagName --jq .tagName)"
+          fi
+          if [ -z "$TAG" ]; then
+            echo "::error::could not resolve a release tag"
+            exit 1
+          fi
+          echo "tag=$TAG"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+  attach:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - darwin/amd64
+          - darwin/arm64
+          - freebsd/amd64
+          - linux/amd64
+          - linux/arm64
+          - windows/amd64
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      TAG: ${{ needs.prepare.outputs.tag }}
+      PLATFORM: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build and attach the missing binary
+        run: |
+          set -euo pipefail
+          GOOS="${PLATFORM%/*}"
+          GOARCH="${PLATFORM#*/}"
+          ext="tar.gz"
+          exe=""
+          if [ "$GOOS" = "windows" ]; then
+            ext="zip"
+            exe=".exe"
+          fi
+          asset="ipget_${TAG}_${GOOS}-${GOARCH}.${ext}"
+
+          existing="$(gh release view "$TAG" --json assets --jq '.assets[].name' || true)"
+          if printf '%s\n' "$existing" | grep -qxF "$asset"; then
+            echo "skip $asset (already on the release)"
+            exit 0
+          fi
+
+          echo "building $asset"
+          # CGO_ENABLED=0 yields a static binary: it cross-compiles every platform from one
+          # runner and the linux build carries no glibc dependency. The version is embedded
+          # from version.json plus the VCS revision, so building the checked-out tag is enough.
+          rm -rf ipget
+          mkdir -p ipget
+          if ! CGO_ENABLED=0 GOOS="$GOOS" GOARCH="$GOARCH" \
+              go build -trimpath -mod=readonly -o "ipget/ipget${exe}" . > ipget/build-log 2>&1; then
+            echo "::group::build-log"; cat ipget/build-log; echo "::endgroup::"
+            exit 1
+          fi
+          cp -a dist/. ipget/
+
+          if [ "$ext" = "zip" ]; then
+            zip -r "$asset" ipget > /dev/null
+          else
+            tar czf "$asset" ipget
+          fi
+          gh release upload "$TAG" "$asset"
