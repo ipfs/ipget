@@ -1,3 +1,18 @@
+> [!IMPORTANT]
+> **This project is no longer maintained and the repository is archived.**
+>
+> Use [`ipfs get`](https://docs.ipfs.tech/reference/kubo/cli/#ipfs-get) from
+> [Kubo](https://github.com/ipfs/kubo) instead. It serves this use case better:
+> same downloads, one less tool to keep up to date, and a node that stays warm
+> between fetches rather than starting from nothing each time.
+>
+> The published binaries stay up and keep working, but there will be no further
+> releases, dependency updates, or security fixes.
+>
+> The repository can be unarchived, but only for a named maintainer who commits
+> to keeping it up. If that is you, reach out to the
+> [IPFS Foundation](https://ipfsfoundation.org/about/).
+
 # ipget
 
 [![](https://img.shields.io/badge/made%20by-Protocol%20Labs-blue.svg?style=flat-square)](https://protocol.ai)
@@ -14,7 +29,7 @@ for whenever they want to retrieve files from IPFS.
 
 ## Install
 
-Download a binary for your platform from [IPFS Distributions](https://dist.ipfs.io/#ipget).
+Download a binary for your platform from [GitHub Releases](https://github.com/ipfs/ipget/releases/latest).
 
 ### Install From Source
 
